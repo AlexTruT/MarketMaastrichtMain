@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/utils";
 import { HeaderCart } from "@/components/shared/HeaderCart";
+import { LanguageToggle } from "@/components/shared/LanguageToggle";
 import type { Product } from "@/lib/types";
 
 const LINKS = [
@@ -59,6 +60,7 @@ export function SiteHeader({
               );
             })}
           </nav>
+          <LanguageToggle />
           <HeaderCart products={products} todayIso={todayIso} />
         </div>
       </div>

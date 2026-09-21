@@ -57,27 +57,27 @@ export function HeaderCart({ products, todayIso }: HeaderCartProps) {
   return (
     <Sheet>
       <SheetTrigger
-        className="hidden min-h-11 items-center gap-2 rounded-md px-2.5 text-sm text-ink transition-colors hover:bg-cobble/40 focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none lg:inline-flex"
+        className="hidden min-h-11 items-center gap-1 rounded-md px-2.5 text-sm text-ink/65 transition-colors hover:text-awning focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none sm:text-lede lg:inline-flex"
         aria-label={
           count === 0
             ? "Open bag"
             : `Open bag, ${count} ${count === 1 ? "item" : "items"}, ${formatEuro(subtotalWithMarkup)}`
         }
       >
-        <span className="relative grid size-9 place-items-center">
-          <ShoppingBag className="size-5" aria-hidden />
+        <span className="relative inline-flex shrink-0">
+          <ShoppingBag className="size-4" strokeWidth={1.75} aria-hidden />
           {count > 0 ? (
-            <span className="absolute -top-0.5 -right-0.5 grid min-w-4.5 place-items-center rounded-full bg-awning px-1 text-[0.65rem] font-semibold leading-none text-paper tabular-nums">
+            <span className="absolute -top-1.5 -right-1.5 grid min-w-4.5 place-items-center rounded-full bg-awning px-1 text-[0.65rem] font-semibold leading-none text-paper tabular-nums">
               {count}
             </span>
           ) : null}
         </span>
         {count > 0 ? (
-          <span className="tabular-nums font-medium">
+          <span className="tabular-nums font-medium text-ink">
             {formatEuro(subtotalWithMarkup)}
           </span>
         ) : (
-          <span className="text-ink/55">Bag</span>
+          <span>Bag</span>
         )}
       </SheetTrigger>
 
