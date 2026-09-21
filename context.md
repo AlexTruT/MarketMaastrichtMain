@@ -64,7 +64,7 @@ This is a hackathon demo built in 5 hours. It must work end to end on a phone an
 
 | Route | Owner | What it does |
 |---|---|---|
-| `/` | A | Next market date and cutoff line. Deals strip. Coming soon strip. Category chips (vegetables, fruit, fish, cheese, bakery, pantry, flowers, more). Product grid, 2 columns on mobile. Each card: product photo tile, name, unit, stall name, price card, add button with qty stepper. |
+| `/` | A | Next market date and cutoff line. Deals strip. Coming soon strip. Category chips (vegetables, fruit, fish, meat, cheese, bakery, pantry, flowers, more). Product grid, 2 columns on mobile. Each card: product photo tile, name, unit, stall name, price card, add button with qty stepper. |
 | `/stalls` | C | Partner stalls list: search, zone filter, market-scene thumb, zone tag, item count. Links to `/stalls/[id]`. |
 | `/stalls/[id]` | C | Seller profile for a partner stall: full-bleed market-scene hero, owner-led header, story, facts, then that stall's products using the same product card as `/`. Read-only; no vendor editing. |
 | `/cart` | B | Cart lines with qty stepper, subtotal (range aware). Checkout form on the same page: fulfilment toggle, address or pickup point, time window, substitution choice, name, phone, note. Fee and total. Submit button "Place order". Server action writes `orders` and `order_items` with price snapshots, clears cart, redirects. |

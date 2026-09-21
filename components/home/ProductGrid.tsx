@@ -11,6 +11,7 @@ const CATEGORIES: { value: ProductCategory | "all"; label: string }[] = [
   { value: "vegetables", label: "Vegetables" },
   { value: "fruit", label: "Fruit" },
   { value: "fish", label: "Fish" },
+  { value: "meat", label: "Meat" },
   { value: "cheese", label: "Cheese" },
   { value: "bakery", label: "Bakery" },
   { value: "pantry", label: "Pantry" },

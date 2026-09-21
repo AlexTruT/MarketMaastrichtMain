@@ -54,6 +54,12 @@ const PRODUCE_KEYS = [
   "grapes",
   "fresh-herbs",
   "bell-peppers",
+  "minced-beef",
+  "chicken-breast",
+  "pork-chops",
+  "verse-worst",
+  "entrecote",
+  "chicken-thighs",
 ] as const;
 
 const HAS_PHOTO = new Set<string>(PRODUCE_KEYS);
@@ -69,6 +75,7 @@ const PHOTO_ALIAS: Record<string, string> = {
   "fresh-goat-cheese": "young-gouda",
   "aged-goat-cheese": "old-gouda",
   quinces: "conference-pears",
+  "entrec-te": "entrecote",
 };
 
 /** Falls back to the category when a product has no photo of its own. */
@@ -76,6 +83,7 @@ const BY_CATEGORY: Record<ProductCategory, string> = {
   vegetables: "tomatoes",
   fruit: "elstar-apples",
   fish: "smoked-mackerel",
+  meat: "minced-beef",
   cheese: "old-gouda",
   bakery: "sourdough-loaf",
   pantry: "free-range-eggs",

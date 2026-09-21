@@ -6,6 +6,7 @@ export type ProductCategory =
   | "vegetables"
   | "fruit"
   | "fish"
+  | "meat"
   | "cheese"
   | "bakery"
   | "pantry"

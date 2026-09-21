@@ -26,7 +26,7 @@ create table products (
   stall_id text references stalls(id),          -- null = general market item, bought by our shopper
   name text not null,
   unit text not null,
-  category text not null check (category in ('vegetables','fruit','fish','cheese','bakery','pantry','flowers','more')),
+  category text not null check (category in ('vegetables','fruit','fish','meat','cheese','bakery','pantry','flowers','more')),
   price_min_cents int not null,                 -- fixed-price items: min = max
   price_max_cents int not null,
   deal_price_cents int,                         -- overrides price when deal is active
@@ -95,7 +95,9 @@ insert into stalls values
 ('speciaal', 'Limburgse Specialiteiten', 'Piet', 'pantry', 'Stadhuis', 'Nuth', 18, 15,
  'Piet bottles Limburgse stroop and apple juice from orchards around Nuth. The krentenmik comes from a baker two villages over.', '🍯'),
 ('geit', 'Geitenkaas van Marieke', 'Marieke', 'cheese', 'Stadhuis', 'Epen', 22, 6,
- 'Marieke milks thirty goats on the plateau above Epen. Soft cheese on Friday, aged rounds when she has them.', '🐐');
+ 'Marieke milks thirty goats on the plateau above Epen. Soft cheese on Friday, aged rounds when she has them.', '🐐'),
+('slager', 'Slagerij van Bart', 'Bart', 'meat', 'Boschstraat', 'Hulsberg', 15, 19,
+ 'Bart comes from a butcher family in Hulsberg. Beef and pork from Limburg farms, chicken from open barns near Nuth. The verse worst sells out by eleven.', '🥩');
 
 -- Products: partner stalls (fixed prices) -----------------------------------
 
@@ -161,6 +163,13 @@ insert into products (id, stall_id, name, unit, category, price_min_cents, price
 (55, 'geit', 'Fresh goat cheese', '200 g', 'cheese', 475, 475, null, null, null, '🧀', 1),
 (56, 'geit', 'Aged goat cheese', '200 g', 'cheese', 625, 625, null, null, null, '🧀', 2),
 (57, 'geit', 'Young Gouda', '500 g', 'cheese', 695, 695, null, null, null, '🧀', 3),
+
+(59, 'slager', 'Minced beef', '500 g', 'meat', 595, 595, null, null, null, '🥩', 1),
+(60, 'slager', 'Chicken breast', '500 g', 'meat', 650, 650, null, null, null, '🍗', 2),
+(61, 'slager', 'Pork chops', '2 pieces', 'meat', 495, 495, null, null, null, '🥩', 3),
+(62, 'slager', 'Verse worst', '4 pieces', 'meat', 450, 450, null, null, null, '🌭', 4),
+(63, 'slager', 'Entrecôte', 'per piece', 'meat', 995, 995, null, null, null, '🥩', 5),
+(64, 'slager', 'Chicken thighs', '500 g', 'meat', 425, 425, null, null, null, '🍗', 6),
 
 -- Coming soon (deal_starts_on in the future): pairs with Hokkaido for a 2-up strip
 (58, 'kersenhoek', 'Quinces', 'per kg', 'fruit', 320, 320, 240, 'First crates from the orchard', '2026-10-16', '🍐', 5);
