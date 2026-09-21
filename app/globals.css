@@ -152,19 +152,34 @@
   }
 }
 
-/* Cart count bump — only after the shopper taps Add, never on page load. */
+/* Interaction motion only — never on page load. Keep short + GPU-friendly. */
 @keyframes cart-bump {
   0%,
   100% {
     transform: scale(1);
   }
   40% {
-    transform: scale(1.22);
+    transform: scale(1.14);
+  }
+}
+
+@keyframes cart-bar-in {
+  from {
+    transform: translateY(0.75rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
   }
 }
 
 .cart-count-bump {
-  animation: cart-bump 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+  animation: cart-bump 0.2s ease-out;
+}
+
+.cart-bar-enter {
+  animation: cart-bar-in 0.2s ease-out;
 }
 
 @layer base {
@@ -193,10 +208,11 @@
      text-sm     14px  nav, chips (≥44px), buttons, list primary lines
      text-meta   13px  labels, eyebrows, units, secondary lines
      text-xs     12px  captions, deal notes, fine print
-   Widths: page-wide (1200) browse/map/stall detail; page-narrow (640)
+   Widths: page-wide (1200) browse/stall detail; page-narrow (640)
    stalls list, cart, order, profile.
-   Spacing: page headers pt-8 + lede pt-3; major sections gap-10;
-   product shelf gap-x-4 gap-y-8; card caption stack gap-0.5 after pt-4.
+   Spacing: page headers pt-8 + lede pt-3; major sections gap-12 with a
+   cobble rule before the whole-market catalogue; product shelf gap-x-4/5
+   gap-y-9/10; card caption stack gap-0.5 after pt-4.
    --------------------------------------------------------------------------- */
 
 @layer base {
@@ -281,5 +297,10 @@
     animation-iteration-count: 1 !important;
     transition-duration: 0.01ms !important;
     scroll-behavior: auto !important;
+  }
+
+  .cart-count-bump,
+  .cart-bar-enter {
+    animation: none !important;
   }
 }

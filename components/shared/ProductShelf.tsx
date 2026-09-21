@@ -56,7 +56,7 @@ export function ProductShelf({
   return (
     <div
       className={cn(
-        "grid w-full grid-cols-2 gap-x-4 gap-y-8",
+        "grid w-full grid-cols-2 gap-x-4 gap-y-9 sm:gap-x-5 sm:gap-y-10",
         dense && "sm:grid-cols-3 lg:grid-cols-4",
         className
       )}

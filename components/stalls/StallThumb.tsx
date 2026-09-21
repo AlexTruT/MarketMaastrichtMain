@@ -29,7 +29,7 @@ export function StallThumb({
         fill
         sizes="72px"
         placeholder="blur"
-        className="object-cover transition-transform duration-300 ease-out group-hover:scale-[1.06] group-focus-visible:scale-[1.06]"
+        className="object-cover transition-transform duration-200 ease-out group-hover:scale-[1.03] group-focus-visible:scale-[1.03]"
         style={{ objectPosition: scene.position }}
         aria-hidden
       />

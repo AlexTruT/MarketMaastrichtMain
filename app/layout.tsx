@@ -31,10 +31,43 @@ const permanentMarker = Permanent_Marker({
   subsets: ["latin"],
 });
 
+const siteUrl = "https://merret.vercel.app";
+const siteTitle = "Merret — You pick, we deliver";
+const siteDescription =
+  "Order from the Maastricht Friday market online. Our shopper walks the stalls for you; couriers deliver to your door or drop it at pickup.";
+
 export const metadata: Metadata = {
-  title: "Merret — the Friday Maastricht market, delivered",
-  description:
-    "Order fresh from the Maastricht Friday market. Our shopper walks the market for you and couriers deliver it or drop it at a pickup point.",
+  metadataBase: new URL(siteUrl),
+  title: {
+    default: siteTitle,
+    template: "%s · Merret",
+  },
+  description: siteDescription,
+  applicationName: "Merret",
+  keywords: [
+    "Merret",
+    "Maastricht",
+    "Friday market",
+    "market delivery",
+    "personal shopper",
+  ],
+  authors: [{ name: "Ivan" }],
+  openGraph: {
+    type: "website",
+    url: siteUrl,
+    siteName: "Merret",
+    title: siteTitle,
+    description: siteDescription,
+    locale: "en_GB",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: siteTitle,
+    description: siteDescription,
+  },
+  alternates: {
+    canonical: siteUrl,
+  },
 };
 
 // Live market catalogue — never bake Supabase into the static build.

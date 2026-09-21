@@ -25,7 +25,7 @@ export function CartBar({ products, today }: CartBarProps) {
   useEffect(() => {
     if (count > prevCount.current) {
       setBump(true);
-      const timer = window.setTimeout(() => setBump(false), 320);
+      const timer = window.setTimeout(() => setBump(false), 220);
       prevCount.current = count;
       return () => window.clearTimeout(timer);
     }
@@ -48,10 +48,10 @@ export function CartBar({ products, today }: CartBarProps) {
   const barTotal = groceries + markupCents(groceries);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 bg-paper px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+    <div className="cart-bar-enter pointer-events-none fixed inset-x-0 bottom-0 z-30 bg-paper px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
       <Link
         href="/cart"
-        className="pointer-events-auto page-wide flex h-14 items-center justify-between gap-3 rounded-md bg-awning px-5 text-paper shadow-[0_-2px_12px_rgba(22,22,22,0.08)] transition-transform active:translate-y-px"
+        className="pointer-events-auto page-wide flex h-14 items-center justify-between gap-3 rounded-md bg-awning px-5 text-paper shadow-[0_-2px_12px_rgba(22,22,22,0.08)] transition-transform duration-150 ease-out active:scale-[0.99]"
       >
         <span className="flex min-w-0 items-center gap-2.5">
           <span

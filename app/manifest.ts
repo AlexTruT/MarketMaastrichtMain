@@ -4,7 +4,8 @@ export default function manifest(): MetadataRoute.Manifest {
   return {
     name: "Merret",
     short_name: "Merret",
-    description: "The Friday Maastricht market, delivered.",
+    description:
+      "You pick, we deliver — the Maastricht Friday market, ordered online.",
     start_url: "/",
     display: "standalone",
     background_color: "#FFFFFF",

@@ -37,13 +37,13 @@ export function MarketHighlights({
   if (deals.length === 0 && comingSoon.length === 0) return null;
 
   return (
-    <div className="grid gap-12 md:grid-cols-2 md:gap-10 lg:gap-12">
+    <div className="grid gap-10 md:grid-cols-2 md:items-start md:gap-8 lg:gap-12">
       {deals.length > 0 && (
         <section>
-          <h2 className="display-lg text-maastricht-red">
+          <h2 className="display-md text-maastricht-red">
             This week&apos;s deals
           </h2>
-          <p className="text-meta pt-1 text-ink/55">
+          <p className="text-meta max-w-[40ch] pt-1.5 text-ink/55">
             Prices our shopper checked on the boards this morning.
           </p>
           <ProductShelf className="mt-5">
@@ -54,8 +54,8 @@ export function MarketHighlights({
 
       {comingSoon.length > 0 && (
         <section>
-          <h2 className="display-lg">Not in season yet</h2>
-          <p className="text-meta pt-1 text-ink/55">
+          <h2 className="display-md">Not in season yet</h2>
+          <p className="text-meta max-w-[40ch] pt-1.5 text-ink/55">
             The date on the card is the Friday it lands on the stall.
           </p>
           <ProductShelf className="mt-5">

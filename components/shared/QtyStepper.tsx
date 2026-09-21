@@ -35,7 +35,7 @@ export function QtyStepper({
         aria-label={`Remove one ${name}`}
         onClick={() => onChange(qty - 1)}
         className={cn(
-          "grid size-11 place-items-center rounded-full text-lg leading-none active:translate-y-px",
+          "grid size-11 place-items-center rounded-full text-lg leading-none transition-[transform,background-color] duration-150 ease-out active:scale-95",
           awning ? "hover:bg-white/15" : "hover:bg-paper"
         )}
       >
@@ -55,7 +55,7 @@ export function QtyStepper({
         disabled={atMax}
         onClick={() => onChange(qty + 1)}
         className={cn(
-          "grid size-11 place-items-center rounded-full text-lg leading-none active:translate-y-px disabled:opacity-40",
+          "grid size-11 place-items-center rounded-full text-lg leading-none transition-[transform,background-color,opacity] duration-150 ease-out active:scale-95 disabled:opacity-40",
           awning ? "hover:bg-white/15" : "hover:bg-paper"
         )}
       >

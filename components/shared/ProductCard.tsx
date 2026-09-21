@@ -50,9 +50,9 @@ export function ProductCard({
   const compact = size === "compact";
 
   return (
-    <article className="flex min-w-0 flex-col">
+    <article className="group flex min-w-0 flex-col">
       <div className="relative">
-        <div className="relative aspect-square overflow-hidden rounded-md bg-paper ring-1 ring-cobble/50">
+        <div className="relative aspect-square overflow-hidden rounded-md bg-paper ring-1 ring-cobble/50 transition-[box-shadow] duration-150 ease-out group-hover:ring-cobble">
           <Produce name={product.name} category={product.category} />
         </div>
 
@@ -96,8 +96,8 @@ export function ProductCard({
               onClick={() => add(product.id)}
               className={
                 compact
-                  ? "absolute top-1 right-1 grid size-9 place-items-center rounded-full bg-awning text-base leading-none text-paper shadow-sm transition-transform hover:scale-105 active:translate-y-px"
-                  : "absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-full bg-awning text-lg leading-none text-paper shadow-sm transition-transform hover:scale-105 active:translate-y-px"
+                  ? "absolute top-1 right-1 grid size-9 place-items-center rounded-full bg-awning text-base leading-none text-paper shadow-sm transition-transform duration-150 ease-out hover:scale-105 active:scale-95"
+                  : "absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-full bg-awning text-lg leading-none text-paper shadow-sm transition-transform duration-150 ease-out hover:scale-105 active:scale-95"
               }
             >
               +
@@ -122,7 +122,7 @@ export function ProductCard({
         {!showSource ? null : product.stall_id && stallName ? (
           <Link
             href={`/stalls/${product.stall_id}`}
-            className="block truncate text-xs text-awning underline decoration-awning/30 underline-offset-2 hover:decoration-awning"
+            className="block truncate text-xs text-awning underline decoration-awning/30 underline-offset-2 transition-[text-decoration-color] duration-150 ease-out hover:decoration-awning"
           >
             {stallName}
           </Link>

@@ -15,13 +15,13 @@ export function StallRow({ stall }: { stall: StallListItem }) {
     <li className="border-b border-cobble last:border-0">
       <Link
         href={`/stalls/${stall.id}`}
-        className="group flex min-h-14 items-center gap-3 py-3.5 transition-colors hover:bg-cobble/25 focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none"
+        className="group flex min-h-14 items-center gap-3.5 py-4 transition-colors duration-150 ease-out hover:bg-cobble/25 focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none"
       >
         <StallThumb stall={stall} />
 
         <span className="min-w-0 flex-1">
           <span className="flex items-baseline gap-2">
-            <span className="truncate text-sm font-semibold text-awning">
+            <span className="display-sm truncate text-awning">
               {stall.name}
             </span>
             <span className="truncate text-meta text-ink/50">
@@ -36,7 +36,7 @@ export function StallRow({ stall }: { stall: StallListItem }) {
 
         <span
           aria-hidden
-          className="shrink-0 text-lg leading-none text-ink/35 transition-transform duration-200 group-hover:translate-x-0.5"
+          className="shrink-0 text-lg leading-none text-ink/35 transition-transform duration-150 ease-out group-hover:translate-x-0.5"
         >
           ›
         </span>

@@ -46,8 +46,9 @@ const DEFAULT_NOTE =
   "Order before Friday 10:00 and it is on your table the same afternoon.";
 
 /**
- * Hero order: cutoff line first, then the yellow countdown card.
- * Countdown stays client-only so SSR and the first client paint match.
+ * Hero order: yellow countdown first (the bold market signal), then one
+ * supporting cutoff line. Countdown stays client-only so SSR and the first
+ * client paint match.
  */
 export function MarketClock({ cutoffIso, closeIso, fallback }: MarketClockProps) {
   const [mounted, setMounted] = useState(false);
@@ -66,18 +67,16 @@ export function MarketClock({ cutoffIso, closeIso, fallback }: MarketClockProps)
 
   return (
     <>
-      <p className="text-lede max-w-[46ch] text-ink/70">
+      <span
+        className="price-sign text-2xl leading-tight"
+        aria-live="polite"
+        suppressHydrationWarning
+      >
+        {ready ? label(now, cutoff, close) : fallback}
+      </span>
+      <p className="text-meta max-w-[46ch] pt-3 text-ink/60">
         {ready ? note(now, cutoff, close) : DEFAULT_NOTE}
       </p>
-      <div className="pt-4">
-        <span
-          className="price-sign text-2xl leading-tight"
-          aria-live="polite"
-          suppressHydrationWarning
-        >
-          {ready ? label(now, cutoff, close) : fallback}
-        </span>
-      </div>
     </>
   );
 }

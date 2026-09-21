@@ -375,7 +375,7 @@ export function CartClient({ products, todayIso }: CartClientProps) {
         ) : null}
         <Link
           href="/"
-          className="mt-7 inline-flex h-12 items-center rounded-md bg-awning px-6 text-sm font-medium text-paper focus-visible:ring-2 focus-visible:ring-awning focus-visible:ring-offset-2 focus-visible:ring-offset-paper focus-visible:outline-none active:translate-y-px"
+          className="mt-7 inline-flex h-12 items-center rounded-md bg-awning px-6 text-sm font-medium text-paper transition-transform duration-150 ease-out focus-visible:ring-2 focus-visible:ring-awning focus-visible:ring-offset-2 focus-visible:ring-offset-paper focus-visible:outline-none active:scale-[0.99]"
         >
           Browse the market
         </Link>
@@ -423,7 +423,7 @@ export function CartClient({ products, todayIso }: CartClientProps) {
                   <button
                     type="button"
                     onClick={() => remove(product.id)}
-                    className="mt-1 inline-flex min-h-11 items-center text-xs text-ink/45 underline underline-offset-2 hover:text-maastricht-red focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none"
+                    className="mt-0.5 -ml-1 inline-flex items-center px-1 py-1 text-xs text-ink/45 underline underline-offset-2 hover:text-maastricht-red focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none"
                   >
                     Remove
                   </button>
@@ -622,16 +622,16 @@ export function CartClient({ products, todayIso }: CartClientProps) {
       </div>
 
       <div className="px-4 py-9">
-        <dl className="flex flex-col gap-2 text-sm">
-          <div className="flex items-baseline justify-between">
+        <dl className="flex flex-col gap-2.5 text-sm">
+          <div className="flex items-baseline justify-between gap-4">
             <dt className="text-ink/60">Groceries</dt>
             <dd className="tabular-nums">{formatEuro(displaySubtotal)}</dd>
           </div>
-          <div className="flex items-baseline justify-between">
+          <div className="flex items-baseline justify-between gap-4">
             <dt className="text-ink/60">Online markup 15%</dt>
             <dd className="tabular-nums">{formatEuro(displayMarkup)}</dd>
           </div>
-          <div className="flex items-baseline justify-between">
+          <div className="flex items-baseline justify-between gap-4">
             <dt className="text-ink/60">
               {fulfilment === "home" ? "Delivery" : "Pickup"}
             </dt>
@@ -661,7 +661,7 @@ export function CartClient({ products, todayIso }: CartClientProps) {
           type="submit"
           disabled={submitting}
           aria-busy={submitting}
-          className="mt-7 h-14 w-full rounded-md bg-awning text-base font-medium text-paper transition-transform focus-visible:ring-2 focus-visible:ring-awning focus-visible:ring-offset-2 focus-visible:ring-offset-paper focus-visible:outline-none active:translate-y-px disabled:pointer-events-none disabled:opacity-60"
+          className="mt-7 h-14 w-full rounded-md bg-awning text-base font-medium text-paper transition-transform duration-150 ease-out focus-visible:ring-2 focus-visible:ring-awning focus-visible:ring-offset-2 focus-visible:ring-offset-paper focus-visible:outline-none active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60"
         >
           {submitting ? "Placing your order…" : "Place order"}
         </button>

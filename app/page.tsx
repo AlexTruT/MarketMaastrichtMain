@@ -46,11 +46,14 @@ export default async function HomePage() {
           />
         </div>
 
-        <div className="page-wide px-4 pt-6">
+        <div className="page-wide px-4 pt-5">
           <h1 className="display-xl max-w-[14ch]">
-            Someone walks the market for you
+            You pick, we deliver
           </h1>
-          <div className="pt-5">
+          <p className="text-lede max-w-[40ch] pt-2.5 text-ink/70">
+            Our shopper walks the Friday market for you.
+          </p>
+          <div className="pt-4">
             <MarketClock
               cutoffIso={at(nextFriday, 10).toISOString()}
               closeIso={at(nextFriday, 15).toISOString()}
@@ -63,7 +66,7 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <div className="page-wide flex flex-col gap-10 px-4 pt-10 pb-4">
+      <div className="page-wide flex flex-col gap-12 px-4 pt-9 pb-6">
         <MarketHighlights
           deals={deals}
           comingSoon={comingSoon}
@@ -71,7 +74,7 @@ export default async function HomePage() {
           today={today}
         />
 
-        <section>
+        <section className="border-t border-cobble pt-10">
           <h2 className="display-lg">The whole market</h2>
           <ProductGrid
             products={products}

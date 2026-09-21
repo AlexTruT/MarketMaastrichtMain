@@ -42,8 +42,8 @@ export default async function StallPage({
         <SellerProfileHeader stall={stall} />
 
         <section className="pt-10">
-          <h2 className="display-md">On the table this Friday</h2>
-          <p className="text-lede max-w-[48ch] pt-2 text-ink/65">
+          <h2 className="display-lg">On the table this Friday</h2>
+          <p className="text-lede max-w-[48ch] pt-2.5 text-ink/65">
             Fixed prices from {stall.owner}. You pay what the card says.
           </p>
           {stallProducts.length === 0 ? (
@@ -52,7 +52,7 @@ export default async function StallPage({
               past it on Friday.
             </p>
           ) : (
-            <ProductShelf dense className="pt-7">
+            <ProductShelf dense className="pt-8">
               {stallProducts.map((product) => (
                 <ProductCard
                   key={product.id}

@@ -70,6 +70,7 @@ This is a hackathon demo built in 5 hours. It must work end to end on a phone an
 | `/cart` | B | Cart lines with qty stepper, subtotal (range aware). Checkout form on the same page: fulfilment toggle, address or pickup point, time window, substitution choice, name, phone, note. Fee and total. Submit button "Place order". Server action writes `orders` and `order_items` with price snapshots, clears cart, redirects. |
 | `/order/[id]` | B | Confirmation: "Order placed", number, window, where, items, total range, "Our shopper buys your order Friday morning". Link to `/profile` with the checkout phone prefilled. |
 | `/profile` | B | Buyer profile: enter phone, confirm a four-digit OTP, then look up recent orders (server-side via `lib/data.ts`). Demo cannot send SMS — show the code on the page. Session cookie after verify. |
+| `/why` | — | Public project justification (need, customers, how it works, pricing model, sources). No auth, no cart bar. |
 | `/courier` | — | Demo courier picker: Alex, Emma, Lucas. Mock shift data in the browser. |
 | `/courier/[id]` | — | Courier tool: hub crates, route map, shift earnings. Profile (name, avatar initials, vehicle, preferred cluster) in the top bar and Shift tab. |
 | `/picker` | C | Phone view for the shopper. Tab 1 "Shopping list": all items from orders with status new or picking, aggregated by product, grouped by zone then stall, e.g. "3 × Smoked mackerel". Big checkbox per line. Tab 2 "Orders": one card per order with window, fulfilment, substitution, note, and status buttons (picking, ready, out, delivered). Poll every 5 seconds via a route handler so a new order appears live. |
@@ -117,11 +118,11 @@ Grounded in the Friday market itself: striped market awnings and hand-written fl
 **Layout**
 - Mobile first, designed at 390px, max content width 640px on desktop.
 - Left aligned. Generous spacing. Tap targets at least 44px.
-- Header: "Merret" wordmark and nav (Market, Stalls, Profile).
+- Header: "Merret" wordmark and nav (Market, Stalls, Profile, Why).
 - Product photos sit on a plain paper tile with a hairline `cobble` ring, not floating and not tinted.
 - Border radius: 6px on cards and inputs. Price cards 2px.
 - No gradients, no drop shadows on UI chrome, except the product photos themselves and a single subtle one on the sticky cart bar.
-- No page-load animations. Motion only on user actions (add to cart bump on the cart count).
+- No page-load animations. Motion only on user actions (add-to-cart bump, cart bar enter, press feedback). Prefer transform/opacity, 150–250ms ease-out. Honour `prefers-reduced-motion`.
 
 **Picker view** uses larger type (18px base), full-width rows, checkbox on the left, checked rows greyed and struck through.
 

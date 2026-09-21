@@ -51,7 +51,7 @@ export function StallsBrowser({ stalls }: { stalls: StallListItem[] }) {
         <div
           role="group"
           aria-label="Filter by zone"
-          className="flex gap-2 overflow-x-auto pb-1"
+          className="flex gap-2 overflow-x-auto pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         >
           <ZoneChip
             label="All zones"
@@ -107,7 +107,7 @@ function ZoneChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "flex h-11 shrink-0 items-center rounded-full px-3.5 text-sm transition-colors",
+        "flex h-11 shrink-0 items-center rounded-full px-3.5 text-sm transition-[background-color,color,transform] duration-150 ease-out active:scale-[0.98]",
         active
           ? "bg-awning font-medium text-paper"
           : "bg-cobble/55 text-ink/70 hover:bg-cobble"

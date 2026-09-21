@@ -2,14 +2,16 @@
 
 > **Merret** (Maastricht dialect for *"Markt"*) brings the Friday Maastricht market online. Our personal shopper walks the market with an aggregated shopping list, buys everything fresh from partner and general stalls, and couriers deliver it or drop it at a pickup point.
 
-Built as a mobile-first hackathon demo designed for phone screens (max content width 640px on desktop).
+## Demo
 
-## Demo (for judges)
+**Live:** [https://merret.vercel.app](https://merret.vercel.app)  
+**Video (backup):** [https://streamable.com/elg9ed](https://streamable.com/elg9ed)
 
-Open: [https://merret.vercel.app](https://merret.vercel.app)
-Video (backup): [https://streamable.com/elg9ed](https://streamable.com/elg9ed)
+You pick products online; Merret’s shopper buys them at the Friday market and a courier delivers or holds for pickup. Phone or laptop — no login.
 
-Phone or laptop. No login.
+**Stack:** Next.js 15 · TypeScript · Tailwind · Supabase · Anthropic (handwritten price-board scan) · Vercel
+
+Project write-up: [merret.vercel.app/why](https://merret.vercel.app/why)
 
 ---
 
@@ -18,23 +20,6 @@ Phone or laptop. No login.
 - **[`context.md`](./context.md)** — Core specification: business rules, pricing, routes, AI price board scanner, design tokens.
 - **[`build-plan.md`](./build-plan.md)** — Timeline, builder roles, demo script, fallback cut list.
 - **[`supabase.sql`](./supabase.sql)** — Database schema & seed data (run once in the Supabase SQL editor).
-
-## Tech stack
-
-- **Framework:** [Next.js 15](https://nextjs.org/) (App Router, TypeScript)
-- **UI:** [Tailwind CSS v4](https://tailwindcss.com/) + [shadcn/ui](https://ui.shadcn.com/)
-- **Database:** [Supabase](https://supabase.com/) Postgres
-- **AI:** Anthropic Messages API for handwritten Dutch price boards
-- **Deploy:** [Vercel](https://vercel.com/) — live at [merret.vercel.app](https://merret.vercel.app)
-
-## Core business rules
-
-- **Market:** Friday 09:00–15:00 on the Markt (Maastricht); demo always targets the next Friday.
-- **Cutoff:** Friday 10:00.
-- **Delivery windows:** `12:00–13:00`, `13:00–14:00`, `14:00–15:00`.
-- **Fulfilment:** Home delivery €4.50 · Pickup free (€0) at *Merret stand, Markt* only.
-- **Substitutions:** `substitute` | `skip` | `call`.
-- **Pricing:** Partner stalls fixed; general market items as ranges; **15%** online markup on grocery subtotal; total = subtotal + markup + fulfilment fee (cents throughout).
 
 ## Local development
 

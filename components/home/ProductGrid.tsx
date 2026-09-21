@@ -52,7 +52,7 @@ export function ProductGrid({
       <div
         role="tablist"
         aria-label="Filter the market by category"
-        className="-mx-4 mt-5 flex gap-2 overflow-x-auto px-4 pb-1"
+        className="-mx-4 mt-6 flex gap-2 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
       >
         {available.map((c) => {
           const active = category === c.value;
@@ -64,7 +64,7 @@ export function ProductGrid({
               aria-selected={active}
               onClick={() => setCategory(c.value)}
               className={cn(
-                "flex h-11 shrink-0 items-center rounded-full px-3.5 text-sm transition-colors",
+                "flex h-11 shrink-0 items-center rounded-full px-3.5 text-sm transition-[background-color,color,transform] duration-150 ease-out active:scale-[0.98]",
                 active
                   ? "bg-awning font-medium text-paper"
                   : "bg-cobble/55 text-ink/70 hover:bg-cobble"
@@ -81,7 +81,7 @@ export function ProductGrid({
           Nothing in this corner of the market this week. Try another category.
         </p>
       ) : (
-        <ProductShelf dense className="pt-7">
+        <ProductShelf dense className="pt-8">
           {visible.map((product) => (
             <ProductCard
               key={product.id}

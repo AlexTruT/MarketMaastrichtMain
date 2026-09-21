@@ -14,15 +14,22 @@ export function SiteFooter() {
     <footer className="mt-auto border-t border-cobble">
       <div className="page-wide flex flex-wrap items-baseline gap-x-4 gap-y-2 px-4 py-6 text-meta text-ink/55">
         <span>Merret · Maastricht</span>
+        <span className="text-ink/40">Personal project</span>
+        <Link
+          href="/why"
+          className="underline-offset-2 transition-colors duration-150 ease-out hover:text-awning hover:underline"
+        >
+          Why Merret
+        </Link>
         <Link
           href="/privacy"
-          className="underline-offset-2 hover:text-awning hover:underline"
+          className="underline-offset-2 transition-colors duration-150 ease-out hover:text-awning hover:underline"
         >
           Privacy
         </Link>
         <Link
           href="/terms"
-          className="underline-offset-2 hover:text-awning hover:underline"
+          className="underline-offset-2 transition-colors duration-150 ease-out hover:text-awning hover:underline"
         >
           Terms
         </Link>

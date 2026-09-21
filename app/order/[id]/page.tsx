@@ -90,20 +90,25 @@ export default async function OrderConfirmationPage({
         {crateLabel}
       </span>
 
-      <ol className="mt-11">
+      <ol className="mt-10">
         {steps.map((step, i) => (
           <li key={step.time} className="flex gap-4">
-            <div className="flex flex-col items-center">
+            <div className="flex w-7 flex-col items-center">
               <span className="grid size-7 shrink-0 place-items-center rounded-full bg-awning text-xs font-semibold text-paper tabular-nums">
                 {i + 1}
               </span>
               {i < steps.length - 1 && (
-                <span aria-hidden className="w-px flex-1 bg-cobble" />
+                <span
+                  aria-hidden
+                  className="mt-1.5 w-px min-h-8 flex-1 bg-cobble"
+                />
               )}
             </div>
-            <div className="pb-7">
-              <p className="text-sm tabular-nums">{step.time}</p>
-              <p className="max-w-[44ch] pt-0.5 text-lede text-ink/70">
+            <div className={i < steps.length - 1 ? "pb-8" : "pb-2"}>
+              <p className="text-sm font-medium tabular-nums text-ink">
+                {step.time}
+              </p>
+              <p className="max-w-[44ch] pt-1 text-lede text-ink/70">
                 {step.text}
               </p>
             </div>
@@ -111,12 +116,14 @@ export default async function OrderConfirmationPage({
         ))}
       </ol>
 
-      <h2 className="display-md pt-2">What you asked for</h2>
+      <h2 className="display-md border-t border-cobble pt-8">
+        What you asked for
+      </h2>
       <ul className="pt-4">
         {order.order_items.map((item) => (
           <li
             key={item.id}
-            className="flex items-center gap-3.5 border-b border-cobble py-3 first:border-t"
+            className="flex items-center gap-3.5 border-b border-cobble py-3.5 first:border-t"
           >
             <span className="relative size-10 shrink-0 overflow-hidden rounded-sm bg-paper ring-1 ring-cobble/50">
               <Produce
@@ -125,7 +132,7 @@ export default async function OrderConfirmationPage({
               />
             </span>
             <div className="min-w-0 flex-1">
-              <p className="truncate text-sm">{item.product.name}</p>
+              <p className="truncate text-sm font-medium">{item.product.name}</p>
               <p className="text-xs text-ink/55">
                 {item.qty} × {item.product.unit}
               </p>
@@ -142,16 +149,16 @@ export default async function OrderConfirmationPage({
         ))}
       </ul>
 
-      <dl className="flex flex-col gap-2 pt-5 text-sm">
-        <div className="flex items-baseline justify-between">
+      <dl className="flex flex-col gap-2.5 pt-6 text-sm">
+        <div className="flex items-baseline justify-between gap-4">
           <dt className="text-ink/60">Groceries</dt>
           <dd className="tabular-nums">{formatEuro(displaySubtotal)}</dd>
         </div>
-        <div className="flex items-baseline justify-between">
+        <div className="flex items-baseline justify-between gap-4">
           <dt className="text-ink/60">Online markup 15%</dt>
           <dd className="tabular-nums">{formatEuro(displayMarkup)}</dd>
         </div>
-        <div className="flex items-baseline justify-between">
+        <div className="flex items-baseline justify-between gap-4">
           <dt className="text-ink/60">
             {order.fulfilment === "home" ? "Delivery" : "Pickup"}
           </dt>
