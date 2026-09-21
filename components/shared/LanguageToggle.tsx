@@ -1,9 +1,12 @@
 "use client";
 
-import { useEffect, useState, type MouseEvent } from "react";
+import { useEffect, useId, useRef, useState } from "react";
+import { ChevronDown } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 const SITE_ORIGIN = "https://merret.vercel.app";
+
+type Lang = "en" | "nl";
 
 /** Decode a `*.translate.goog` host back to the original hostname. */
 function decodeTranslateGoogHost(encoded: string): string {
@@ -57,32 +60,55 @@ function googleTranslateUrl(pageUrl: string): string {
 }
 
 /**
- * Compact EN | NL control. NL opens the current page in Google Translate
+ * Compact language dropdown. NL opens the current page in Google Translate
  * website mode; EN returns to the original Merret URL.
  */
 export function LanguageToggle() {
-  const [nlActive, setNlActive] = useState(false);
+  const [lang, setLang] = useState<Lang>("en");
+  const [open, setOpen] = useState(false);
+  const rootRef = useRef<HTMLDivElement>(null);
+  const listId = useId();
 
   useEffect(() => {
-    setNlActive(isTranslatedView());
+    setLang(isTranslatedView() ? "nl" : "en");
   }, []);
 
-  function goEnglish(e: MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    const url = originalPageUrl();
-    if (url !== window.location.href) {
-      window.location.assign(url);
-      return;
-    }
-    setNlActive(false);
-  }
+  useEffect(() => {
+    if (!open) return;
 
-  function goDutch(e: MouseEvent<HTMLButtonElement>) {
-    e.preventDefault();
-    if (isTranslatedView()) {
-      setNlActive(true);
+    function onPointerDown(e: PointerEvent) {
+      if (!rootRef.current?.contains(e.target as Node)) setOpen(false);
+    }
+    function onKeyDown(e: KeyboardEvent) {
+      if (e.key === "Escape") setOpen(false);
+    }
+
+    document.addEventListener("pointerdown", onPointerDown);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("pointerdown", onPointerDown);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, [open]);
+
+  function selectLang(next: Lang) {
+    setOpen(false);
+
+    if (next === "en") {
+      const url = originalPageUrl();
+      if (url !== window.location.href) {
+        window.location.assign(url);
+        return;
+      }
+      setLang("en");
       return;
     }
+
+    if (isTranslatedView()) {
+      setLang("nl");
+      return;
+    }
+
     // Google cannot fetch localhost — point at the live site path instead.
     const pageUrl =
       window.location.hostname === "localhost" ||
@@ -92,41 +118,61 @@ export function LanguageToggle() {
     window.location.assign(googleTranslateUrl(pageUrl));
   }
 
+  const label = lang === "nl" ? "NL" : "EN";
+
   return (
-    <div
-      role="group"
-      aria-label="Language"
-      className="inline-flex shrink-0 items-end gap-0.5 pb-1 text-sm"
-    >
+    <div ref={rootRef} className="relative shrink-0 pb-1 text-sm">
       <button
         type="button"
-        onClick={goEnglish}
-        aria-pressed={!nlActive}
+        aria-label="Language"
+        aria-haspopup="listbox"
+        aria-expanded={open}
+        aria-controls={listId}
+        onClick={() => setOpen((v) => !v)}
         className={cn(
-          "inline-flex min-h-11 items-end px-1.5 transition-colors duration-150 ease-out",
-          !nlActive
-            ? "font-medium text-awning"
-            : "text-ink/65 hover:text-awning"
+          "inline-flex min-h-11 items-end gap-0.5 px-1.5 font-medium text-awning transition-colors duration-150 ease-out",
+          "hover:text-awning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-awning"
         )}
       >
-        EN
+        <span>{label}</span>
+        <ChevronDown
+          className={cn(
+            "mb-0.5 size-3.5 shrink-0 text-ink/50 transition-transform duration-150",
+            open && "rotate-180"
+          )}
+          strokeWidth={2}
+          aria-hidden
+        />
       </button>
-      <span className="pb-0.5 text-ink/35" aria-hidden>
-        |
-      </span>
-      <button
-        type="button"
-        onClick={goDutch}
-        aria-pressed={nlActive}
-        className={cn(
-          "inline-flex min-h-11 items-end px-1.5 transition-colors duration-150 ease-out",
-          nlActive
-            ? "font-medium text-awning"
-            : "text-ink/65 hover:text-awning"
-        )}
-      >
-        NL
-      </button>
+
+      {open ? (
+        <ul
+          id={listId}
+          role="listbox"
+          aria-label="Language"
+          className="absolute top-full right-0 z-50 mt-0.5 min-w-[4.5rem] overflow-hidden rounded-md border border-cobble bg-paper py-1 shadow-sm"
+        >
+          {(["en", "nl"] as const).map((option) => {
+            const selected = lang === option;
+            return (
+              <li key={option} role="option" aria-selected={selected}>
+                <button
+                  type="button"
+                  onClick={() => selectLang(option)}
+                  className={cn(
+                    "flex min-h-11 w-full items-center px-3 text-left text-sm transition-colors duration-150 ease-out",
+                    selected
+                      ? "font-medium text-awning"
+                      : "text-ink/65 hover:bg-cobble/40 hover:text-awning"
+                  )}
+                >
+                  {option.toUpperCase()}
+                </button>
+              </li>
+            );
+          })}
+        </ul>
+      ) : null}
     </div>
   );
 }
