@@ -7,7 +7,8 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
-  --font-heading: var(--font-sans);
+  --font-heading: var(--font-display);
+  --font-display: var(--font-display);
   --font-price: var(--font-price);
 
   /* Merret design tokens, see context.md "Design" */
@@ -59,7 +60,7 @@
 
 :root {
   /* Merret palette, see context.md "Design" */
-  --paper: #ffffff;
+  --paper: #fbf8f1;
   --ink: #161616;
   --awning-green: #1e5b3f;
   --price-yellow: #f7e84b;
@@ -100,9 +101,16 @@
   --sidebar-ring: var(--awning-green);
 }
 
+/* One global focus ring — awning green, 2px offset. Prefer this over
+   per-component focus-visible:ring-* utilities. */
+:focus-visible {
+  outline: 2px solid var(--awning-green);
+  outline-offset: 2px;
+}
+
 /* Courier app only, see /courier. Additive: nothing above is redefined. */
 @theme {
-  --color-canvas: #f5f3ee;
+  --color-canvas: #efeade;
   --color-ink-soft: #5a5a55;
   --color-ink-faint: #8d8d86;
   --color-awning-tint: #e8f1eb;
@@ -144,6 +152,21 @@
   }
 }
 
+/* Cart count bump — only after the shopper taps Add, never on page load. */
+@keyframes cart-bump {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.22);
+  }
+}
+
+.cart-count-bump {
+  animation: cart-bump 0.28s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -153,5 +176,73 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Typography system. Instrument Serif carries every heading; Instrument Sans
+   carries the interface. Permanent Marker is reserved for price signs and is
+   never used for a heading — the marker is the market's voice, not ours.
+   --------------------------------------------------------------------------- */
+
+@layer base {
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display), Georgia, serif;
+    font-weight: 400;
+    letter-spacing: -0.015em;
+  }
+}
+
+@utility display-xl {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(2.75rem, 13vw, 3.75rem);
+  line-height: 0.92;
+  letter-spacing: -0.03em;
+}
+
+@utility display-lg {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: clamp(1.875rem, 8vw, 2.25rem);
+  line-height: 1;
+  letter-spacing: -0.025em;
+}
+
+@utility display-md {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.4375rem;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+@utility display-sm {
+  font-family: var(--font-display), Georgia, serif;
+  font-size: 1.125rem;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+}
+
+/* A price written by hand on a card and propped in the crate. The only thing
+   on the page allowed to sit above the paper, so it never gets a sibling. */
+@utility price-sign {
+  display: inline-block;
+  font-family: var(--font-price), cursive;
+  background: var(--price-yellow);
+  color: var(--ink);
+  border-radius: 2px;
+  padding: 0.125rem 0.5rem;
+  transform: rotate(-2.5deg);
+  box-shadow: 0 1px 0 rgb(0 0 0 / 0.18);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
   }
 }

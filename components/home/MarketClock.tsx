@@ -11,6 +11,10 @@ type MarketClockProps = {
   fallback: string;
 };
 
+function plural(n: number, one: string, many: string): string {
+  return `${n} ${n === 1 ? one : many}`;
+}
+
 function label(now: Date, cutoff: Date, close: Date): string {
   if (now >= cutoff && now < close) return "Shopping now";
 
@@ -22,9 +26,13 @@ function label(now: Date, cutoff: Date, close: Date): string {
   const hours = Math.floor((minutes % 1440) / 60);
   const mins = minutes % 60;
 
-  if (days > 0) return `${days}d ${hours}h left`;
-  if (hours > 0) return `${hours}h ${mins}m left`;
-  return `${mins}m left`;
+  if (days > 0) {
+    return `${plural(days, "day", "days")} ${plural(hours, "hour", "hours")} left`;
+  }
+  if (hours > 0) {
+    return `${plural(hours, "hour", "hours")} ${plural(mins, "minute", "minutes")} left`;
+  }
+  return `${plural(mins, "minute", "minutes")} left`;
 }
 
 function note(now: Date, cutoff: Date, close: Date): string {
@@ -38,16 +46,10 @@ const DEFAULT_NOTE =
   "Order before Friday 10:00 and it is on your table the same afternoon.";
 
 /**
- * The 10:00 cutoff is the whole product: miss it and your order waits a
- * week. It gets the market's own voice — written on a card — rather than a
- * line of grey body text.
- *
- * Countdown must be client-only: computing "now" during SSR and again on
- * hydrate produces a mismatch (Next.js "1 Issue" badge). We keep a stable
- * placeholder until after mount.
+ * Hero order: cutoff line first, then the yellow countdown card.
+ * Countdown stays client-only so SSR and the first client paint match.
  */
 export function MarketClock({ cutoffIso, closeIso, fallback }: MarketClockProps) {
-  // null until mount — first client paint must match SSR HTML exactly
   const [mounted, setMounted] = useState(false);
   const [now, setNow] = useState<Date | null>(null);
 
@@ -64,16 +66,18 @@ export function MarketClock({ cutoffIso, closeIso, fallback }: MarketClockProps)
 
   return (
     <>
-      <span
-        className="price-sign text-[1.6rem] leading-tight"
-        aria-live="polite"
-        suppressHydrationWarning
-      >
-        {ready ? label(now, cutoff, close) : fallback}
-      </span>
-      <p className="max-w-[46ch] pt-3 text-sm leading-relaxed text-ink/70">
+      <p className="max-w-[46ch] text-sm leading-relaxed text-ink/70">
         {ready ? note(now, cutoff, close) : DEFAULT_NOTE}
       </p>
+      <div className="pt-4">
+        <span
+          className="price-sign text-[1.6rem] leading-tight"
+          aria-live="polite"
+          suppressHydrationWarning
+        >
+          {ready ? label(now, cutoff, close) : fallback}
+        </span>
+      </div>
     </>
   );
 }

@@ -1,8 +1,9 @@
 "use client";
 
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
 import { PriceCard } from "@/components/shared/PriceCard";
+import { Produce } from "@/components/shared/Produce";
+import { QtyStepper } from "@/components/shared/QtyStepper";
 import { useCart } from "@/lib/cart";
 import { isDealActive, isComingSoon, unitRange } from "@/lib/pricing";
 import type { Product } from "@/lib/types";
@@ -10,88 +11,101 @@ import type { Product } from "@/lib/types";
 type ProductCardProps = {
   product: Product;
   stallName?: string | null;
-  today: Date;
+  today: Date | string;
+  /** Off on a stall's own page, where naming the stall on every tile is noise. */
+  showSource?: boolean;
 };
 
-export function ProductCard({ product, stallName, today }: ProductCardProps) {
+function formatStartDate(iso: string): string {
+  const [y, m, d] = iso.split("-").map(Number);
+  return new Date(y, m - 1, d).toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+  });
+}
+
+/**
+ * Goods on the stall table: the produce sits on the paper and the price is
+ * written on a card propped against it. Nothing here is boxed — the sign is
+ * the only element allowed to lift off the page, which is what makes a
+ * screen of these read as a market rather than a catalogue.
+ */
+export function ProductCard({
+  product,
+  stallName,
+  today,
+  showSource = true,
+}: ProductCardProps) {
   const { items, add, setQty } = useCart();
   const deal = isDealActive(product, today);
   const comingSoon = isComingSoon(product, today);
   const { min, max } = unitRange(product, today);
   const cartItem = items.find((item) => item.productId === product.id);
 
-  const sourceLabel = product.stall_id
-    ? stallName
-    : "Picked by our shopper at the best stall of the day";
-
   return (
-    <div className="flex flex-col gap-2 rounded-md border border-cobble bg-paper p-3">
-      <div className="flex items-start gap-3">
-        <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-md bg-cobble/40 text-3xl">
-          {product.emoji}
+    <article className="flex min-w-0 flex-col">
+      <div className="relative">
+        <div className="relative aspect-square overflow-hidden rounded-md bg-paper ring-1 ring-cobble/50">
+          <Produce name={product.name} category={product.category} />
         </div>
-        <div className="min-w-0 flex-1">
-          <p className="truncate font-medium leading-tight">{product.name}</p>
-          <p className="text-sm text-muted-foreground">{product.unit}</p>
-          {sourceLabel && (
-            <p className="truncate text-xs text-muted-foreground">
-              {product.stall_id ? (
-                <Link href={`/stalls/${product.stall_id}`} className="hover:text-awning">
-                  {sourceLabel}
-                </Link>
-              ) : (
-                sourceLabel
-              )}
-            </p>
-          )}
-        </div>
-      </div>
 
-      {comingSoon ? (
-        <div className="flex items-center justify-between">
-          <PriceCard min={min} max={max} />
-          <span className="rounded-md bg-cobble px-2 py-1 text-xs font-medium">
-            Coming {product.deal_starts_on}
+        {comingSoon ? (
+          <span className="price-sign absolute -bottom-2.5 left-2 bg-cobble text-[1.1rem] leading-tight text-ink/70">
+            {formatStartDate(product.deal_starts_on!)}
           </span>
-        </div>
-      ) : (
-        <div className="flex items-end justify-between">
+        ) : (
           <PriceCard
             min={min}
             max={max}
             oldMin={deal ? product.price_min_cents : undefined}
             oldMax={deal ? product.price_max_cents : undefined}
-            dealNote={deal ? product.deal_note ?? undefined : undefined}
+            className="absolute -bottom-2.5 left-2"
           />
-          {cartItem ? (
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                size="icon"
-                variant="outline"
-                aria-label={`Remove one ${product.name}`}
-                onClick={() => setQty(product.id, cartItem.qty - 1)}
-              >
-                –
-              </Button>
-              <span className="w-5 text-center font-medium">{cartItem.qty}</span>
-              <Button
-                type="button"
-                size="icon"
-                variant="outline"
-                aria-label={`Add one more ${product.name}`}
-                onClick={() => setQty(product.id, cartItem.qty + 1)}
-              >
-                +
-              </Button>
+        )}
+
+        {!comingSoon &&
+          (cartItem ? (
+            <div className="absolute top-1.5 right-1.5">
+              <QtyStepper
+                name={product.name}
+                qty={cartItem.qty}
+                onChange={(qty) => setQty(product.id, qty)}
+                tone="awning"
+              />
             </div>
           ) : (
-            <Button type="button" onClick={() => add(product.id)}>
-              Add
-            </Button>
-          )}
-        </div>
-      )}
-    </div>
+            <button
+              type="button"
+              aria-label={`Add ${product.name} to your bag`}
+              onClick={() => add(product.id)}
+              className="absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-full bg-awning text-lg leading-none text-paper shadow-sm transition-transform hover:scale-105 active:translate-y-px"
+            >
+              +
+            </button>
+          ))}
+      </div>
+
+      <div className="min-w-0 pt-5">
+        <h3 className="display-sm truncate">{product.name}</h3>
+        <p className="text-[0.8125rem] text-ink/55">{product.unit}</p>
+        {deal && product.deal_note ? (
+          <p className="mt-0.5 line-clamp-2 text-xs text-maastricht-red">
+            {product.deal_note}
+          </p>
+        ) : null}
+        {!showSource ? null : product.stall_id && stallName ? (
+          <Link
+            href={`/stalls/${product.stall_id}`}
+            className="mt-0.5 block truncate text-xs text-awning underline decoration-awning/30 underline-offset-2 hover:decoration-awning"
+          >
+            {stallName}
+          </Link>
+        ) : (
+          <p className="mt-0.5 text-xs leading-snug text-ink/45">
+            Picked by our shopper at the best stall of the day
+          </p>
+        )}
+      </div>
+    </article>
   );
 }

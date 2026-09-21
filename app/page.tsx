@@ -1,8 +1,11 @@
+import Image from "next/image";
 import { getProducts, getStalls } from "@/lib/data";
 import { getNextMarketFriday, isComingSoon, isDealActive } from "@/lib/pricing";
 import { ProductCard } from "@/components/shared/ProductCard";
+import { ProductShelf } from "@/components/shared/ProductShelf";
 import { ProductGrid } from "@/components/home/ProductGrid";
-import { CartBar } from "@/components/shared/CartBar";
+import { MarketClock } from "@/components/home/MarketClock";
+import marketPhoto from "@/assets/vrijdagmarkt-groentekraam-maastricht-eighty8things_3475807105.webp";
 
 function formatMarketDate(date: Date): string {
   return date.toLocaleDateString("en-GB", {
@@ -10,6 +13,12 @@ function formatMarketDate(date: Date): string {
     day: "numeric",
     month: "long",
   });
+}
+
+function at(day: Date, hour: number): Date {
+  const d = new Date(day);
+  d.setHours(hour, 0, 0, 0);
+  return d;
 }
 
 export default async function HomePage() {
@@ -23,51 +32,89 @@ export default async function HomePage() {
 
   return (
     <>
-      <div className="flex flex-col gap-6 p-4">
-        <section className="flex flex-col gap-1">
-          <h1 className="text-2xl font-bold">Friday market</h1>
-          <p className="text-sm text-muted-foreground">
-            Next market: {formatMarketDate(nextFriday)}, 09:00 to 15:00. Order
-            before 10:00.
+      <section>
+        {/* Full-bleed hero — outer layout has no max-width, so the photo
+            can span the viewport without breakout hacks. */}
+        <div className="relative h-[220px] w-full overflow-hidden md:h-[42vh] md:max-h-[26rem]">
+          <Image
+            src={marketPhoto}
+            alt="A vegetable stall on the Markt during the Maastricht Friday market"
+            fill
+            sizes="100vw"
+            priority
+            placeholder="blur"
+            className="object-cover object-[center_42%]"
+          />
+        </div>
+
+        <div className="mx-auto w-full max-w-[1200px] px-4 pt-6">
+          <h1 className="display-xl max-w-[14ch]">
+            Someone walks the market for you
+          </h1>
+          <div className="pt-5">
+            <MarketClock
+              cutoffIso={at(nextFriday, 10).toISOString()}
+              closeIso={at(nextFriday, 15).toISOString()}
+              fallback="Opening"
+            />
+          </div>
+          <p className="pt-3 text-sm text-ink/55">
+            Next market {formatMarketDate(nextFriday)}, 09:00 to 15:00.
           </p>
-        </section>
+        </div>
+      </section>
 
-        {deals.length > 0 && (
-          <section className="flex flex-col gap-2">
-            <h2 className="text-lg font-bold text-maastricht-red">Deals</h2>
-            <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
-              {deals.map((product) => (
-                <div key={product.id} className="w-[220px] shrink-0">
-                  <ProductCard
-                    product={product}
-                    stallName={product.stall_id ? stallNames[product.stall_id] : null}
-                    today={today}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
+      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-10 px-4 pt-10 pb-4">
+        {(deals.length > 0 || comingSoon.length > 0) && (
+          <div className="flex flex-col gap-8">
+            {deals.length > 0 && (
+              <section>
+                <h2 className="display-lg text-maastricht-red">
+                  This week&apos;s deals
+                </h2>
+                <p className="pt-1 text-sm text-ink/55">
+                  Prices our shopper checked on the boards this morning.
+                </p>
+                <ProductShelf dense className="mt-5">
+                  {deals.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      stallName={
+                        product.stall_id ? stallNames[product.stall_id] : null
+                      }
+                      today={today}
+                    />
+                  ))}
+                </ProductShelf>
+              </section>
+            )}
+
+            {comingSoon.length > 0 && (
+              <section>
+                <h2 className="display-md">Not in season yet</h2>
+                <p className="pt-1 text-sm text-ink/55">
+                  The date on the card is the Friday it lands on the stall.
+                </p>
+                <ProductShelf dense className="mt-5">
+                  {comingSoon.map((product) => (
+                    <ProductCard
+                      key={product.id}
+                      product={product}
+                      stallName={
+                        product.stall_id ? stallNames[product.stall_id] : null
+                      }
+                      today={today}
+                    />
+                  ))}
+                </ProductShelf>
+              </section>
+            )}
+          </div>
         )}
 
-        {comingSoon.length > 0 && (
-          <section className="flex flex-col gap-2">
-            <h2 className="text-lg font-bold">Coming soon</h2>
-            <div className="-mx-4 flex gap-3 overflow-x-auto px-4 pb-1">
-              {comingSoon.map((product) => (
-                <div key={product.id} className="w-[220px] shrink-0">
-                  <ProductCard
-                    product={product}
-                    stallName={product.stall_id ? stallNames[product.stall_id] : null}
-                    today={today}
-                  />
-                </div>
-              ))}
-            </div>
-          </section>
-        )}
-
-        <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-bold">Market</h2>
+        <section>
+          <h2 className="display-lg">The whole market</h2>
           <ProductGrid
             products={products}
             stallNames={stallNames}
@@ -75,7 +122,6 @@ export default async function HomePage() {
           />
         </section>
       </div>
-      <CartBar products={products} today={today} />
     </>
   );
 }

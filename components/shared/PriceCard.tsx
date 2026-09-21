@@ -1,19 +1,36 @@
 import { cn } from "@/lib/utils";
-import { formatRange } from "@/lib/pricing";
+import { formatEuro } from "@/lib/pricing";
 
 type PriceCardProps = {
   min: number;
   max: number;
   /**
    * Set when a deal is active, to show the old price struck through above
-   * the card. Pass both bounds (not just min) — a ranged general-market
-   * item's old price is itself a range, not a single number.
+   * the deal price inside the yellow card.
    */
   oldMin?: number;
   oldMax?: number;
   dealNote?: string;
+  /** "md" for grids and strips, "lg" for a stall or product headline. */
+  size?: "sm" | "md" | "lg";
   className?: string;
 };
+
+/**
+ * Ranges are written the way a stallholder writes them on the card —
+ * "€2.40–3.20", not "€2.40 to €3.20". The long form stays in lib/pricing
+ * for running text, where the word reads better than the dash.
+ */
+function signText(min: number, max: number): string {
+  if (min === max) return formatEuro(min);
+  return `${formatEuro(min)}–${(max / 100).toFixed(2)}`;
+}
+
+const SIZES = {
+  sm: "text-base",
+  md: "text-[1.2rem]",
+  lg: "text-[1.75rem]",
+} as const;
 
 export function PriceCard({
   min,
@@ -21,28 +38,30 @@ export function PriceCard({
   oldMin,
   oldMax,
   dealNote,
+  size = "md",
   className,
 }: PriceCardProps) {
   const isDeal = oldMin != null && oldMax != null;
 
   return (
-    <div className={cn("inline-flex flex-col items-start gap-0.5", className)}>
-      {isDeal && (
-        <span className="pl-1 text-xs text-muted-foreground line-through">
-          {formatRange(oldMin, oldMax)}
-        </span>
-      )}
+    <span className={cn("inline-flex flex-col items-start gap-1", className)}>
       <span
         className={cn(
-          "-rotate-2 rounded-price bg-price-yellow px-2 py-0.5 font-price text-lg leading-tight text-ink",
+          "price-sign leading-tight",
+          SIZES[size],
           isDeal && "text-maastricht-red"
         )}
       >
-        {formatRange(min, max)}
+        {isDeal && (
+          <span className="mb-0.5 block text-[0.65em] font-sans font-normal tracking-normal text-ink/55 line-through">
+            {signText(oldMin, oldMax)}
+          </span>
+        )}
+        {signText(min, max)}
       </span>
       {isDeal && dealNote && (
-        <span className="pl-1 text-xs text-muted-foreground">{dealNote}</span>
+        <span className="pl-0.5 text-xs text-maastricht-red">{dealNote}</span>
       )}
-    </div>
+    </span>
   );
 }

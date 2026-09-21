@@ -1,7 +1,11 @@
+import Image from "next/image";
 import { notFound } from "next/navigation";
 import { getProducts, getProductsByStall, getStall } from "@/lib/data";
+import { stallScene } from "@/lib/stall-scenes";
 import { ProductCard } from "@/components/shared/ProductCard";
+import { ProductShelf } from "@/components/shared/ProductShelf";
 import { CartBar } from "@/components/shared/CartBar";
+import { SellerProfileHeader } from "@/components/stalls/SellerProfileHeader";
 
 export default async function StallPage({
   params,
@@ -18,52 +22,50 @@ export default async function StallPage({
 
   if (!stall) notFound();
 
+  const scene = stallScene(stall);
+
   return (
     <>
-      <div className="flex flex-col gap-6 p-4">
-        <section className="flex flex-col gap-3">
-          <div className="flex items-center gap-3">
-            <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-md bg-cobble/40 text-4xl">
-              {stall.emoji}
-            </div>
-            <div>
-              <h1 className="text-2xl font-bold leading-tight">
-                {stall.name}
-              </h1>
-              <p className="text-sm text-muted-foreground">{stall.owner}</p>
-            </div>
-          </div>
-          <p>{stall.story}</p>
-          <dl className="grid grid-cols-2 gap-3 rounded-md border border-cobble p-3 text-sm">
-            <div>
-              <dt className="text-muted-foreground">Origin</dt>
-              <dd className="font-medium">{stall.origin}</dd>
-            </div>
-            {stall.km_from_market != null && (
-              <div>
-                <dt className="text-muted-foreground">Distance</dt>
-                <dd className="font-medium">{stall.km_from_market} km</dd>
-              </div>
-            )}
-            <div>
-              <dt className="text-muted-foreground">At the market</dt>
-              <dd className="font-medium">{stall.years_at_market} years</dd>
-            </div>
-          </dl>
-        </section>
+      {/* Full-bleed market scene — same breakout pattern as the home hero. */}
+      <div className="relative h-[min(58vw,20rem)] w-screen max-w-[100vw] ml-[calc(50%-50vw)] overflow-hidden bg-cobble">
+        <Image
+          src={scene.src}
+          alt={scene.alt}
+          fill
+          sizes="100vw"
+          priority
+          placeholder="blur"
+          className="object-cover"
+          style={{ objectPosition: scene.position }}
+        />
+      </div>
 
-        <section className="flex flex-col gap-3">
-          <h2 className="text-lg font-bold">Products</h2>
-          <div className="grid grid-cols-2 gap-3">
-            {stallProducts.map((product) => (
-              <ProductCard
-                key={product.id}
-                product={product}
-                stallName={stall.name}
-                today={today}
-              />
-            ))}
-          </div>
+      <div className="flex flex-col px-4 pt-6 pb-4">
+        <SellerProfileHeader stall={stall} />
+
+        <section className="pt-10">
+          <h2 className="display-md">On the table this Friday</h2>
+          <p className="max-w-[48ch] pt-2 text-sm leading-relaxed text-ink/65">
+            Fixed prices from {stall.owner}. You pay what the card says.
+          </p>
+          {stallProducts.length === 0 ? (
+            <p className="pt-4 text-sm text-ink/55">
+              Nothing listed from this stall yet. Our shopper will still walk
+              past it on Friday.
+            </p>
+          ) : (
+            <ProductShelf dense className="pt-7">
+              {stallProducts.map((product) => (
+                <ProductCard
+                  key={product.id}
+                  product={product}
+                  stallName={stall.name}
+                  showSource={false}
+                  today={today}
+                />
+              ))}
+            </ProductShelf>
+          )}
         </section>
       </div>
       <CartBar products={allProducts} today={today} />

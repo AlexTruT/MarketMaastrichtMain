@@ -1,107 +1,110 @@
+import Image from "next/image";
 import Link from "next/link";
-import { getProducts, getStalls } from "@/lib/data";
-import { CartBar } from "@/components/shared/CartBar";
+import { getStalls } from "@/lib/data";
+import {
+  MarktPlan,
+  ZONE_CAPTION,
+  ZONE_COLOR,
+  ZONE_ORDER,
+} from "@/components/map/MarktPlan";
 import type { Stall, Zone } from "@/lib/types";
+import stadhuisPhoto from "@/assets/vrijdagmarkt-stadhuis-maastricht-eighty8things_77138142.webp";
+import fishPhoto from "@/assets/markt-vis-maastricht-marketing-hugo-thomassen.webp";
+import flowersPhoto from "@/assets/vrijdagmarkt-bloemenkraam-maastricht-eighty8things_958508054.webp";
 
-const ZONES: {
-  name: Zone;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
-  colorVar: string;
-}[] = [
-  {
-    name: "Stadhuis",
-    x: 20,
-    y: 20,
-    width: 160,
-    height: 120,
-    colorVar: "var(--awning-green)",
+const ZONE_PHOTO: Record<
+  Zone,
+  { src: typeof stadhuisPhoto; alt: string }
+> = {
+  Stadhuis: {
+    src: stadhuisPhoto,
+    alt: "The Stadhuis on the Markt during the Friday market",
   },
-  {
-    name: "Boschstraat",
-    x: 200,
-    y: 20,
-    width: 100,
-    height: 120,
-    colorVar: "var(--maastricht-red)",
+  Boschstraat: {
+    src: fishPhoto,
+    alt: "Fish stalls on the Boschstraat side of the Markt",
   },
-  {
-    name: "Mosae Forum",
-    x: 20,
-    y: 160,
-    width: 280,
-    height: 90,
-    colorVar: "#8a6f2a",
+  "Mosae Forum": {
+    src: flowersPhoto,
+    alt: "A flower stall on the Mosae Forum side of the Markt",
   },
-];
+};
 
 export default async function MapPage() {
-  const today = new Date();
-  const [stalls, products] = await Promise.all([getStalls(), getProducts()]);
+  const stalls = await getStalls();
 
   const byZone = new Map<Zone, Stall[]>();
   for (const stall of stalls) {
-    const list = byZone.get(stall.zone) ?? [];
-    list.push(stall);
-    byZone.set(stall.zone, list);
+    byZone.set(stall.zone, [...(byZone.get(stall.zone) ?? []), stall]);
+  }
+
+  const numbers = new Map<string, number>();
+  let counter = 0;
+  for (const zone of ZONE_ORDER) {
+    for (const stall of byZone.get(zone) ?? []) {
+      numbers.set(stall.id, ++counter);
+    }
   }
 
   return (
-    <>
-      <div className="flex flex-col gap-6 p-4">
-        <h1 className="text-2xl font-bold">Map</h1>
+    <div className="mx-auto w-full max-w-[1200px]">
+      <div className="px-4 pt-8">
+        <h1 className="display-lg">Where the stalls stand</h1>
+        <p className="max-w-[56ch] pt-3 text-[0.9375rem] leading-relaxed text-ink/70">
+          The Stadhuis sits in the middle of the Markt and the stalls fill the
+          square around it. Our shopper walks it in this order, which is why
+          fish comes back last and coldest.
+        </p>
+      </div>
 
-        <svg
-          viewBox="0 0 320 270"
-          className="w-full rounded-md border border-cobble"
-          role="img"
-          aria-label="Map of the Markt with three zones: Stadhuis, Boschstraat, Mosae Forum"
-        >
-          {ZONES.map((zone) => (
-            <g key={zone.name}>
-              <rect
-                x={zone.x}
-                y={zone.y}
-                width={zone.width}
-                height={zone.height}
-                rx={6}
-                style={{
-                  fill: zone.colorVar,
-                  fillOpacity: 0.15,
-                  stroke: zone.colorVar,
-                  strokeWidth: 2,
-                }}
-              />
-              <text
-                x={zone.x + 10}
-                y={zone.y + 24}
-                style={{ fill: "var(--ink)" }}
-                fontSize="14"
-                fontWeight="bold"
-              >
-                {zone.name}
-              </text>
-            </g>
-          ))}
-        </svg>
+      <div className="px-4 pt-7">
+        <MarktPlan stalls={stalls} numbers={numbers} />
+      </div>
 
-        {(["Stadhuis", "Boschstraat", "Mosae Forum"] as Zone[]).map((zone) => {
+      <div className="flex flex-col gap-12 px-4 pt-10 pb-4">
+        {ZONE_ORDER.map((zone) => {
           const zoneStalls = byZone.get(zone) ?? [];
           if (zoneStalls.length === 0) return null;
+          const photo = ZONE_PHOTO[zone];
           return (
-            <section key={zone} className="flex flex-col gap-2">
-              <h2 className="text-lg font-bold">{zone}</h2>
-              <ul className="flex flex-col divide-y divide-cobble border-y border-cobble">
+            <section key={zone}>
+              <div className="relative -mx-4 aspect-21/9 overflow-hidden">
+                <Image
+                  src={photo.src}
+                  alt={photo.alt}
+                  fill
+                  sizes="(max-width: 640px) 100vw, 1200px"
+                  placeholder="blur"
+                  className="object-cover"
+                />
+              </div>
+              <h2 className="display-md pt-5">{zone}</h2>
+              <p className="pt-1 text-[0.8125rem] text-ink/55">
+                {ZONE_CAPTION[zone]}
+              </p>
+              <ul className="pt-3">
                 {zoneStalls.map((stall) => (
-                  <li key={stall.id}>
+                  <li
+                    key={stall.id}
+                    className="border-b border-cobble last:border-0"
+                  >
                     <Link
                       href={`/stalls/${stall.id}`}
-                      className="flex items-center gap-3 py-3"
+                      className="flex min-h-11 items-center gap-3 py-3 transition-colors hover:bg-cobble/25"
                     >
-                      <span className="text-2xl">{stall.emoji}</span>
-                      <span className="font-medium">{stall.name}</span>
+                      <span
+                        aria-hidden
+                        className="grid size-6 shrink-0 place-items-center rounded-full text-[0.6875rem] font-semibold text-paper"
+                        style={{ backgroundColor: ZONE_COLOR[zone] }}
+                      >
+                        {numbers.get(stall.id)}
+                      </span>
+                      <span className="min-w-0 flex-1 truncate">
+                        {stall.name}
+                      </span>
+                      <span className="shrink-0 text-[0.8125rem] text-ink/50">
+                        {stall.owner}
+                      </span>
                     </Link>
                   </li>
                 ))}
@@ -110,7 +113,6 @@ export default async function MapPage() {
           );
         })}
       </div>
-      <CartBar products={products} today={today} />
-    </>
+    </div>
   );
 }
