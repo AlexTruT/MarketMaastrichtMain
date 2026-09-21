@@ -67,3 +67,30 @@ Before starting, all team members should review these key documents:
 - **Typography:**
   - UI & Body: **Instrument Sans** (via `next/font`)
   - Price tags: **Permanent Marker** (via `next/font`, rotated -2°)
+
+---
+
+## 🚀 Local development
+
+The app is scaffolded: Next.js 15 App Router, TypeScript strict, Tailwind v4, shadcn/ui, and the shared `lib/` files below are ready. Every route has an empty stub page — build out your own routes on your own branch.
+
+1. `npm install`
+2. Copy `.env.example` to `.env.local` and fill in the three values (ask the Lead for the Supabase and Anthropic keys, or see "Manual setup" below if you're the Lead):
+   - `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY` — from the Supabase project settings (API page).
+   - `ANTHROPIC_API_KEY` — from console.anthropic.com, only needed for `/picker/scan`.
+3. `npm run dev` and open `http://localhost:3000`.
+
+**Manual setup (Lead, once):**
+
+1. Create a Supabase project. In the SQL editor, paste and run `supabase.sql` once — it creates the tables and seeds stalls, products, and 8 demo orders.
+2. Copy the Project URL and `service_role` key from Settings → API into `.env.local` (never the `anon` key — server code needs the service role to bypass RLS, which stays off per `supabase.sql`).
+3. Add the same three env vars to the Vercel project (Settings → Environment Variables) before deploying.
+4. Re-run `supabase.sql` any time you want to reset demo data (e.g. before the live demo, to clear testing orders).
+
+**Already built (shared code + Lead's `/picker` route), don't re-build these:**
+
+- `lib/supabase.ts`, `lib/types.ts`, `lib/pricing.ts`, `lib/cart.tsx`, `lib/data.ts`
+- `app/layout.tsx`, `app/globals.css`, fonts and color tokens, `app/manifest.ts`
+- `components/shared/PriceCard.tsx`, `ProductCard.tsx`, `CartBar.tsx`
+- `components/ui/*` (shadcn: button, card, input, textarea, radio-group, tabs, badge, checkbox, sonner)
+- `/picker` (both tabs, polling, server actions) — owned by the Lead; `/picker/scan` is still a stub for Builder C.
