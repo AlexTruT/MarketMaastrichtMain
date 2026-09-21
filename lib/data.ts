@@ -1,7 +1,7 @@
 import "server-only";
 import { cache } from "react";
 import { supabase } from "./supabase";
-import type { Product, Stall } from "./types";
+import type { Order, OrderItemWithProduct, Product, Stall } from "./types";
 
 // supabase-js doesn't go through Next's fetch cache, so without this,
 // calling e.g. getProducts() from both a page and a layout would hit the
@@ -46,5 +46,20 @@ export const getProductsByStall = cache(
       .order("sort", { ascending: true });
     if (error) throw error;
     return data ?? [];
+  }
+);
+
+// Used by /order/[id] to show the confirmation screen.
+export const getOrder = cache(
+  async (
+    id: number
+  ): Promise<(Order & { order_items: OrderItemWithProduct[] }) | null> => {
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*, order_items(*, product:products(*))")
+      .eq("id", id)
+      .maybeSingle();
+    if (error) throw error;
+    return data;
   }
 );

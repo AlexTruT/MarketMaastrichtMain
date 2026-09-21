@@ -1,6 +1,13 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  experimental: {
+    // The price board scanner sends a base64 photo as a server action
+    // argument; a real phone photo comfortably exceeds Next's 1MB default.
+    serverActions: {
+      bodySizeLimit: "10mb",
+    },
+  },
   // Baseline security headers. Static and declarative, so this adds no
   // runtime cost or bundle size — just a few extra response headers.
   async headers() {

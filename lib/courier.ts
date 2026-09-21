@@ -8,6 +8,7 @@ import type {
   SubstitutionPreference,
 } from "./courier-types";
 import { CLUSTER_META } from "./courier-mock-data";
+import { formatEuro } from "./pricing";
 
 /** Average cargo e-bike speed through the Maastricht centre. */
 const BIKE_KMH = 15;
@@ -17,9 +18,10 @@ const MINUTES_PER_DROP = 3;
 const BASE_HOURLY_RATE_CENTS = 1500;
 const DROP_BONUS_CENTS = 400;
 
-export function formatEuro(cents: number): string {
-  return `€${(cents / 100).toFixed(2)}`;
-}
+// Re-exported so existing courier imports (`from "@/lib/courier"`) keep
+// working. formatEuro itself lives in the shared lib/pricing.ts, per
+// context.md: "Format only at render time with formatEuro() from lib/pricing.ts."
+export { formatEuro };
 
 export function formatDistance(meters: number): string {
   if (meters < 950) return `${Math.round(meters / 10) * 10} m`;

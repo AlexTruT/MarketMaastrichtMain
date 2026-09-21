@@ -1,7 +1,7 @@
-export default function CartPage() {
-  return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold">Cart</h1>
-    </div>
-  );
+import { getProducts } from "@/lib/data";
+import { CartClient } from "@/components/cart/CartClient";
+
+export default async function CartPage() {
+  const products = await getProducts();
+  return <CartClient products={products} todayIso={new Date().toISOString()} />;
 }

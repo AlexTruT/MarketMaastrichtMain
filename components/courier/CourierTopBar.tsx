@@ -12,7 +12,7 @@ export function AwningStripe({ className = "" }: { className?: string }) {
       className={`h-2 w-full ${className}`}
       style={{
         backgroundImage:
-          "repeating-linear-gradient(90deg, #1e5b3f 0, #1e5b3f 16px, #ffffff 16px, #ffffff 32px)",
+          "repeating-linear-gradient(90deg, var(--awning-green) 0, var(--awning-green) 16px, var(--paper) 16px, var(--paper) 32px)",
       }}
     />
   );
