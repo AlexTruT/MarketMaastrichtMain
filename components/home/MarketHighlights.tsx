@@ -18,8 +18,8 @@ function cards(
 }
 
 /**
- * Weekly deals and coming-soon: stacked under 640px, half-width side by side
- * from sm up. Each shelf stays a 2-column grid. Desktop (lg): cobble panels.
+ * Deals lead (buy now). Coming-soon is quieter secondary context.
+ * Stacked under 640px; half-width side by side from sm. Dense = 2-col shelves.
  */
 export function MarketHighlights({
   deals,
@@ -37,12 +37,16 @@ export function MarketHighlights({
   return (
     <div className="grid gap-10 sm:grid-cols-2 sm:items-start sm:gap-6">
       {deals.length > 0 && (
-        <section className="lg:rounded-xl lg:bg-cobble/35 lg:p-6">
+        <section
+          id="deals"
+          className="scroll-mt-24 lg:rounded-xl lg:bg-cobble/35 lg:p-6"
+        >
           <h2 className="display-md text-maastricht-red">
             This week&apos;s deals
           </h2>
           <p className="text-meta max-w-[40ch] pt-1.5 text-ink/55">
-            Prices our shopper checked on the boards this morning.
+            Board prices our shopper checked this morning — add before Friday
+            10:00.
           </p>
           <ProductShelf dense className="mt-5">
             {cards(deals, stallNames, today)}
@@ -51,12 +55,12 @@ export function MarketHighlights({
       )}
 
       {comingSoon.length > 0 && (
-        <section className="lg:rounded-xl lg:bg-cobble/35 lg:p-6">
-          <h2 className="display-md">Not in season yet</h2>
-          <p className="text-meta max-w-[40ch] pt-1.5 text-ink/55">
-            The date on the card is the Friday it lands on the stall.
+        <section className="sm:pt-1 lg:pt-2">
+          <h2 className="display-sm text-ink/70">Coming later</h2>
+          <p className="text-meta max-w-[40ch] pt-1 text-ink/45">
+            Date on the card is the Friday it lands.
           </p>
-          <ProductShelf dense className="mt-5">
+          <ProductShelf dense className="mt-4">
             {cards(comingSoon, stallNames, today)}
           </ProductShelf>
         </section>

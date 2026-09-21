@@ -18,11 +18,17 @@ type CartBarProps = {
 };
 
 export function CartBar({ products, today }: CartBarProps) {
-  const { items, count } = useCart();
-  const prevCount = useRef(count);
+  const { items, count, ready } = useCart();
+  const prevCount = useRef<number | null>(null);
   const [bump, setBump] = useState(false);
 
   useEffect(() => {
+    if (!ready) return;
+    // First paint after hydrate: adopt count without a bump animation.
+    if (prevCount.current === null) {
+      prevCount.current = count;
+      return;
+    }
     if (count > prevCount.current) {
       setBump(true);
       const timer = window.setTimeout(() => setBump(false), 220);
@@ -30,9 +36,9 @@ export function CartBar({ products, today }: CartBarProps) {
       return () => window.clearTimeout(timer);
     }
     prevCount.current = count;
-  }, [count]);
+  }, [count, ready]);
 
-  if (count === 0) return null;
+  if (!ready || count === 0) return null;
 
   let subtotalMin = 0;
   let subtotalMax = 0;

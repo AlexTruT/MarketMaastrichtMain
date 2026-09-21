@@ -28,11 +28,12 @@ export function LayoutCartBar({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { count, items, remove } = useCart();
+  const { count, items, remove, ready } = useCart();
   const today = useMemo(() => new Date(todayIso), [todayIso]);
   const onRoute = showsCartBar(pathname);
   // Bottom sticky bar is mobile-only; desktop uses the header cart.
-  const barOpen = onRoute && count > 0;
+  // Wait for cart hydrate so reload doesn't jump padding before the bar exists.
+  const barOpen = onRoute && ready && count > 0;
 
   useEffect(() => {
     if (products.length === 0) return;

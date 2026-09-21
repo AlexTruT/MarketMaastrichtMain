@@ -1,6 +1,12 @@
 import Image from "next/image";
+import Link from "next/link";
 import { getProducts, getStalls } from "@/lib/data";
-import { getNextMarketFriday, isComingSoon, isDealActive } from "@/lib/pricing";
+import {
+  amsterdamAt,
+  getNextMarketFriday,
+  isComingSoon,
+  isDealActive,
+} from "@/lib/pricing";
 import { ProductGrid } from "@/components/home/ProductGrid";
 import { MarketHighlights } from "@/components/home/MarketHighlights";
 import { MarketClock } from "@/components/home/MarketClock";
@@ -12,13 +18,8 @@ function formatMarketDate(date: Date): string {
     weekday: "long",
     day: "numeric",
     month: "long",
+    timeZone: "Europe/Amsterdam",
   });
-}
-
-function at(day: Date, hour: number): Date {
-  const d = new Date(day);
-  d.setHours(hour, 0, 0, 0);
-  return d;
 }
 
 export default async function HomePage() {
@@ -26,11 +27,12 @@ export default async function HomePage() {
   const [products, stalls] = await Promise.all([getProducts(), getStalls()]);
   const stallNames = Object.fromEntries(stalls.map((s) => [s.id, s.name]));
   const nextFriday = getNextMarketFriday(today);
-  const cutoff = at(nextFriday, 10);
-  const close = at(nextFriday, 15);
+  const cutoff = amsterdamAt(nextFriday, 10);
+  const close = amsterdamAt(nextFriday, 15);
 
   const deals = products.filter((p) => isDealActive(p, today));
   const comingSoon = products.filter((p) => isComingSoon(p, today));
+  const ctaHref = deals.length > 0 ? "#deals" : "#market";
 
   const heroCopy = (
     <>
@@ -49,6 +51,17 @@ export default async function HomePage() {
       <p className="text-meta pt-3 text-ink/55">
         Next market {formatMarketDate(nextFriday)}, 09:00 to 15:00.
       </p>
+      <p className="text-meta max-w-[46ch] pt-2 text-ink/55">
+        Pickup free · Delivery €4.50 · Same Friday afternoon
+      </p>
+      <div className="pt-5">
+        <Link
+          href={ctaHref}
+          className="inline-flex h-12 items-center rounded-md bg-awning px-5 text-sm font-medium text-paper transition-transform duration-150 ease-out hover:bg-awning/90 focus-visible:ring-2 focus-visible:ring-awning focus-visible:ring-offset-2 focus-visible:ring-offset-paper focus-visible:outline-none active:scale-[0.99]"
+        >
+          Browse this week&apos;s market
+        </Link>
+      </div>
     </>
   );
 
@@ -97,8 +110,11 @@ export default async function HomePage() {
           today={today}
         />
 
-        <section className="border-t border-cobble pt-10">
+        <section id="market" className="scroll-mt-24 border-t border-cobble pt-10">
           <h2 className="display-lg">The whole market</h2>
+          <p className="text-meta max-w-[46ch] pt-1.5 text-ink/55">
+            Everything our shopper can pick this Friday — filter by stall corner.
+          </p>
           <ProductGrid
             products={products}
             stallNames={stallNames}

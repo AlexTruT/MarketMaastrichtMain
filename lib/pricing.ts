@@ -238,3 +238,41 @@ export function getNextMarketFriday(today: Date | string): Date {
   // Noon UTC on the Amsterdam calendar day keeps the weekday stable across DST.
   return new Date(Date.UTC(year, month - 1, day + daysUntilFriday, 12, 0, 0));
 }
+
+/**
+ * Wall-clock time in Europe/Amsterdam on the Amsterdam calendar day of `day`.
+ * Avoids setHours() (server local TZ) so Vercel UTC and Maastricht phones agree.
+ */
+export function amsterdamAt(
+  day: Date | string,
+  hour: number,
+  minute = 0
+): Date {
+  const { year, month, day: d } = amsterdamParts(asDate(day));
+  let t = Date.UTC(year, month - 1, d, hour, minute, 0);
+  for (let i = 0; i < 4; i++) {
+    const parts = new Intl.DateTimeFormat("en-GB", {
+      timeZone: MARKET_TZ,
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hourCycle: "h23",
+    }).formatToParts(new Date(t));
+    const get = (type: Intl.DateTimeFormatPartTypes) =>
+      Number(parts.find((p) => p.type === type)?.value ?? NaN);
+    const desired = Date.UTC(year, month - 1, d, hour, minute);
+    const actual = Date.UTC(
+      get("year"),
+      get("month") - 1,
+      get("day"),
+      get("hour"),
+      get("minute")
+    );
+    const diff = desired - actual;
+    if (diff === 0) return new Date(t);
+    t += diff;
+  }
+  return new Date(t);
+}
