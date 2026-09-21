@@ -48,13 +48,11 @@ export function BuyerOrderList({
   return (
     <div className="flex flex-col gap-5">
       <div>
-        <p className="text-meta text-awning">Buyer profile</p>
-        <h2 className="display-md pt-1">{name}</h2>
+        <h2 className="display-md">{name}</h2>
         <p className="text-meta pt-1 text-ink/60">
           {orders.length === 1
             ? "1 recent order"
-            : `${orders.length} recent orders`}{" "}
-          · confirmed with a code on this phone
+            : `${orders.length} recent orders`}
         </p>
       </div>
 

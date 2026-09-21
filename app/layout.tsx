@@ -70,8 +70,8 @@ export const metadata: Metadata = {
   },
 };
 
-// Live market catalogue — never bake Supabase into the static build.
-export const dynamic = "force-dynamic";
+// Catalogue changes weekly; 60s ISR keeps TTFB low without baking build-time DB.
+export const revalidate = 60;
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const today = new Date();
@@ -89,7 +89,10 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col overflow-x-hidden bg-paper text-ink">
         <CartProvider>
-          <SiteHeader />
+          <SiteHeader
+            products={products}
+            todayIso={today.toISOString()}
+          />
           {/* No max-width on the outer shell — hero photo and header bar stay
               full-bleed. Inner page content and header nav share 1200px. */}
           <main className="flex w-full flex-1 flex-col">

@@ -38,7 +38,7 @@ export default async function StallPage({
         />
       </div>
 
-      <div className="page-wide flex flex-col px-4 pt-6 pb-4">
+      <div className="page-wide flex flex-col pt-6 pb-4">
         <SellerProfileHeader stall={stall} />
 
         <section className="pt-10">

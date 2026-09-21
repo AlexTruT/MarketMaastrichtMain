@@ -18,10 +18,8 @@ function cards(
 }
 
 /**
- * Weekly deals and coming-soon side by side from md up (each column its own
- * heading + 2-up shelf), stacked on mobile. Cards use the default size so
- * highlight images sit closer to the main market grid, not the tiny compact
- * strip.
+ * Weekly deals and coming-soon: stacked under 640px, half-width side by side
+ * from sm up. Each shelf stays a 2-column grid. Desktop (lg): cobble panels.
  */
 export function MarketHighlights({
   deals,
@@ -37,28 +35,28 @@ export function MarketHighlights({
   if (deals.length === 0 && comingSoon.length === 0) return null;
 
   return (
-    <div className="grid gap-10 md:grid-cols-2 md:items-start md:gap-8 lg:gap-12">
+    <div className="grid gap-10 sm:grid-cols-2 sm:items-start sm:gap-6">
       {deals.length > 0 && (
-        <section>
+        <section className="lg:rounded-xl lg:bg-cobble/35 lg:p-6">
           <h2 className="display-md text-maastricht-red">
             This week&apos;s deals
           </h2>
           <p className="text-meta max-w-[40ch] pt-1.5 text-ink/55">
             Prices our shopper checked on the boards this morning.
           </p>
-          <ProductShelf className="mt-5">
+          <ProductShelf dense className="mt-5">
             {cards(deals, stallNames, today)}
           </ProductShelf>
         </section>
       )}
 
       {comingSoon.length > 0 && (
-        <section>
+        <section className="lg:rounded-xl lg:bg-cobble/35 lg:p-6">
           <h2 className="display-md">Not in season yet</h2>
           <p className="text-meta max-w-[40ch] pt-1.5 text-ink/55">
             The date on the card is the Friday it lands on the stall.
           </p>
-          <ProductShelf className="mt-5">
+          <ProductShelf dense className="mt-5">
             {cards(comingSoon, stallNames, today)}
           </ProductShelf>
         </section>

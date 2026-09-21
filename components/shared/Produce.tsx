@@ -15,7 +15,7 @@ export function produceKey(name: string): string {
   return name.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 }
 
-/** Every key here must have a matching file at `public/produce/<key>.jpg`. */
+/** Every key here must have a matching file at `public/produce/<key>.webp`. */
 const PRODUCE_KEYS = [
   "tomatoes",
   "potatoes",
@@ -60,7 +60,7 @@ const HAS_PHOTO = new Set<string>(PRODUCE_KEYS);
 
 /**
  * Map product names without their own file onto an existing studio photo.
- * Prefer this over inventing new JPGs for close cousins (jars, mushrooms, cheese).
+ * Prefer this over inventing new photos for close cousins (jars, mushrooms, cheese).
  */
 const PHOTO_ALIAS: Record<string, string> = {
   "extra-virgin-olive-oil": "limburgse-stroop",
@@ -113,10 +113,11 @@ export function Produce({
   const alt = label ?? name;
   return (
     <Image
-      src={`/produce/${key}.jpg`}
+      src={`/produce/${key}.webp`}
       alt={alt}
       fill
       sizes={sizes}
+      quality={75}
       className={cn("object-cover", className)}
     />
   );

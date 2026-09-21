@@ -127,8 +127,8 @@ export function PhoneOtpForm({ initialPhone = "" }: { initialPhone?: string }) {
           autoComplete="tel"
           inputMode="tel"
           defaultValue={phone}
-          placeholder="06 1234 5601"
-          className="h-12 w-full rounded-md border border-cobble bg-paper px-3 text-base outline-none focus-visible:border-awning"
+          placeholder="06 12 34 56 78"
+          className="h-12 w-full rounded-md border border-cobble bg-paper px-3 text-base text-ink placeholder:text-ink/35 outline-none focus-visible:border-awning"
           aria-invalid={error ? true : undefined}
           aria-describedby={error ? "otp-error" : undefined}
         />
@@ -148,6 +148,7 @@ export function PhoneOtpForm({ initialPhone = "" }: { initialPhone?: string }) {
       >
         {pending ? "Sending…" : "Send code"}
       </button>
+      <p className="text-meta text-ink/50">Demo: the code is shown on screen.</p>
     </form>
   );
 }

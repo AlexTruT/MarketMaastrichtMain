@@ -31,6 +31,7 @@ export function LayoutCartBar({
   const { count, items, remove } = useCart();
   const today = useMemo(() => new Date(todayIso), [todayIso]);
   const onRoute = showsCartBar(pathname);
+  // Bottom sticky bar is mobile-only; desktop uses the header cart.
   const barOpen = onRoute && count > 0;
 
   useEffect(() => {
@@ -48,7 +49,8 @@ export function LayoutCartBar({
       <div
         className={cn(
           "flex min-h-0 flex-1 flex-col",
-          barOpen && "pb-[calc(3.5rem+env(safe-area-inset-bottom)+1.5rem)]"
+          barOpen &&
+            "pb-[calc(3.5rem+env(safe-area-inset-bottom)+1.5rem)] lg:pb-0"
         )}
       >
         {children}

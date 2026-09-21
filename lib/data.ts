@@ -1,62 +1,83 @@
 import "server-only";
+import { unstable_cache } from "next/cache";
 import { cache } from "react";
 import { supabase } from "./supabase";
 import type { Order, OrderItemWithProduct, Product, Stall } from "./types";
 
-// supabase-js doesn't go through Next's fetch cache, so without this,
-// calling e.g. getProducts() from both a page and a layout would hit the
-// database twice for one request. React's cache() dedupes calls made
-// during the same render — it never persists across requests, so data is
-// exactly as fresh as before, just without redundant round-trips.
+// React cache() dedupes within one request (layout + page). unstable_cache
+// persists across requests for 60s so dynamic routes (profile, etc.) don't
+// re-hit Supabase on every navigation. supabase-js bypasses Next's fetch cache.
 
-export const getProducts = cache(async (): Promise<Product[]> => {
-  try {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .order("sort", { ascending: true });
-    if (error) throw error;
-    return data ?? [];
-  } catch (err) {
-    // Build / offline: don't take down every page that reads the catalogue.
-    console.error("[getProducts]", err);
-    return [];
-  }
-});
+const fetchProducts = unstable_cache(
+  async (): Promise<Product[]> => {
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .order("sort", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    } catch (err) {
+      // Build / offline: don't take down every page that reads the catalogue.
+      console.error("[getProducts]", err);
+      return [];
+    }
+  },
+  ["catalogue-products"],
+  { revalidate: 60 }
+);
 
-export const getStalls = cache(async (): Promise<Stall[]> => {
+const fetchStalls = unstable_cache(
+  async (): Promise<Stall[]> => {
+    try {
+      const { data, error } = await supabase
+        .from("stalls")
+        .select("*")
+        .order("name", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    } catch (err) {
+      console.error("[getStalls]", err);
+      return [];
+    }
+  },
+  ["catalogue-stalls"],
+  { revalidate: 60 }
+);
+
+export const getProducts = cache(async (): Promise<Product[]> => fetchProducts());
+
+export const getStalls = cache(async (): Promise<Stall[]> => fetchStalls());
+
+export const getStall = cache(async (id: string): Promise<Stall | null> => {
   try {
     const { data, error } = await supabase
       .from("stalls")
       .select("*")
-      .order("name", { ascending: true });
+      .eq("id", id)
+      .maybeSingle();
     if (error) throw error;
-    return data ?? [];
+    return data;
   } catch (err) {
-    console.error("[getStalls]", err);
-    return [];
+    console.error("[getStall]", err);
+    return null;
   }
-});
-
-export const getStall = cache(async (id: string): Promise<Stall | null> => {
-  const { data, error } = await supabase
-    .from("stalls")
-    .select("*")
-    .eq("id", id)
-    .maybeSingle();
-  if (error) throw error;
-  return data;
 });
 
 export const getProductsByStall = cache(
   async (id: string): Promise<Product[]> => {
-    const { data, error } = await supabase
-      .from("products")
-      .select("*")
-      .eq("stall_id", id)
-      .order("sort", { ascending: true });
-    if (error) throw error;
-    return data ?? [];
+    try {
+      const { data, error } = await supabase
+        .from("products")
+        .select("*")
+        .eq("stall_id", id)
+        .order("sort", { ascending: true });
+      if (error) throw error;
+      return data ?? [];
+    } catch (err) {
+      console.error("[getProductsByStall]", err);
+      return [];
+    }
   }
 );
 

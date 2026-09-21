@@ -50,10 +50,12 @@ export function ProductCard({
   const compact = size === "compact";
 
   return (
-    <article className="group flex min-w-0 flex-col">
+    <article className="group flex h-full min-w-0 flex-col">
       <div className="relative">
-        <div className="relative aspect-square overflow-hidden rounded-md bg-paper ring-1 ring-cobble/50 transition-[box-shadow] duration-150 ease-out group-hover:ring-cobble">
-          <Produce name={product.name} category={product.category} />
+        <div className="relative aspect-square overflow-hidden rounded-md bg-paper ring-1 ring-cobble/50 transition-[box-shadow,ring-color] duration-200 ease-out lg:group-hover:ring-2 lg:group-hover:ring-awning/45">
+          <div className="absolute inset-0 transition-transform duration-200 ease-out lg:group-hover:scale-[1.03]">
+            <Produce name={product.name} category={product.category} />
+          </div>
         </div>
 
         {comingSoon ? (
@@ -108,11 +110,11 @@ export function ProductCard({
       <div
         className={
           compact
-            ? "flex min-w-0 flex-col gap-0.5 pt-3"
-            : "flex min-w-0 flex-col gap-0.5 pt-4"
+            ? "flex min-w-0 flex-1 flex-col gap-0.5 pt-3"
+            : "flex min-w-0 flex-1 flex-col gap-0.5 pt-4"
         }
       >
-        <h3 className="display-sm truncate">{product.name}</h3>
+        <h3 className="display-sm line-clamp-2 leading-tight">{product.name}</h3>
         <p className="text-meta text-ink/55">{product.unit}</p>
         {deal && product.deal_note ? (
           <p className="line-clamp-2 text-xs text-maastricht-red">
@@ -122,12 +124,12 @@ export function ProductCard({
         {!showSource ? null : product.stall_id && stallName ? (
           <Link
             href={`/stalls/${product.stall_id}`}
-            className="block truncate text-xs text-awning underline decoration-awning/30 underline-offset-2 transition-[text-decoration-color] duration-150 ease-out hover:decoration-awning"
+            className="mt-auto block truncate pt-1 text-xs text-awning underline decoration-awning/30 underline-offset-2 transition-[text-decoration-color] duration-150 ease-out hover:decoration-awning"
           >
             {stallName}
           </Link>
         ) : (
-          <p className="text-xs leading-snug text-ink/45">
+          <p className="mt-auto pt-1 text-xs leading-snug text-ink/45">
             Picked by our shopper at the best stall of the day
           </p>
         )}

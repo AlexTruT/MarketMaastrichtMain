@@ -16,9 +16,9 @@ export default async function StallsPage() {
     itemCount: counts.get(stall.id) ?? 0,
   }));
 
-  // Readable list column — same width as cart/profile (page-narrow).
+  // Mobile: narrow column. Desktop: full 1200px for the 2-col card grid.
   return (
-    <div className="page-narrow pb-4">
+    <div className="mx-auto w-full max-w-[40rem] pb-4 lg:max-w-[75rem]">
       <div className="px-4 pt-8">
         <h1 className="display-lg">Partner stalls</h1>
         <p className="text-lede max-w-[56ch] pt-3 text-ink/70">

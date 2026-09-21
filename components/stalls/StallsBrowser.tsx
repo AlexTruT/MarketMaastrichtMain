@@ -1,7 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { StallRow, type StallListItem } from "@/components/stalls/StallRow";
+import {
+  StallCard,
+  StallRow,
+  type StallListItem,
+} from "@/components/stalls/StallRow";
 import type { Zone } from "@/lib/types";
 import { cn } from "@/lib/utils";
 
@@ -82,9 +86,12 @@ export function StallsBrowser({ stalls }: { stalls: StallListItem[] }) {
           No stalls match that search. Try another name, origin or zone.
         </p>
       ) : (
-        <ul className="mt-1 flex flex-col px-4 pb-4">
+        <ul className="mt-1 flex flex-col px-4 pb-4 lg:mt-4 lg:grid lg:grid-cols-2 lg:gap-6">
           {filtered.map((stall) => (
             <StallRow key={stall.id} stall={stall} />
+          ))}
+          {filtered.map((stall) => (
+            <StallCard key={`card-${stall.id}`} stall={stall} />
           ))}
         </ul>
       )}

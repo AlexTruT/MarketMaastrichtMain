@@ -23,7 +23,7 @@ export const COURIER_PROFILES: CourierProfile[] = [
     firstName: "Alex",
     role: "Student courier, Zuyd",
     vehicle: "Urban Arrow cargo e-bike",
-    avatar: "/couriers/alex.jpg",
+    avatar: "/couriers/alex.webp",
     preferredCluster: "centrum_wyck",
   },
   {
@@ -32,7 +32,7 @@ export const COURIER_PROFILES: CourierProfile[] = [
     firstName: "Emma",
     role: "Student courier, UM",
     vehicle: "Gazelle HeavyDuty e-bike",
-    avatar: "/couriers/emma.jpg",
+    avatar: "/couriers/emma.webp",
     preferredCluster: "ceramique_randwyck",
   },
   {
@@ -41,7 +41,7 @@ export const COURIER_PROFILES: CourierProfile[] = [
     firstName: "Lucas",
     role: "Student courier, UM",
     vehicle: "Bakfiets e-cargo classic",
-    avatar: "/couriers/lucas.jpg",
+    avatar: "/couriers/lucas.webp",
     preferredCluster: "brusselsepoort_belfort",
   },
 ];

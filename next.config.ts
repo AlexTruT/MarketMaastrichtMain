@@ -1,6 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
+  images: {
+    // Serve modern formats from the optimizer; sources are already webp.
+    formats: ["image/avif", "image/webp"],
+  },
   experimental: {
     // Crossfade App Router navigations via the View Transitions API.
     viewTransition: true,

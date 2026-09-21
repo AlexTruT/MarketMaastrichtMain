@@ -31,7 +31,7 @@ export interface CourierProfile {
   firstName: string;
   role: string;
   vehicle: string;
-  /** Public path to portrait photo, e.g. `/couriers/alex.jpg`. */
+  /** Public path to portrait photo, e.g. `/couriers/alex.webp`. */
   avatar: string;
   preferredCluster: DeliveryCluster;
 }
