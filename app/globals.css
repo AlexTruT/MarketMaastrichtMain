@@ -182,6 +182,31 @@
   animation: cart-bar-in 0.2s ease-out;
 }
 
+/* Client route changes — enter only, ~180ms. Layout chrome stays put. */
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.page-enter {
+  animation: page-enter 180ms ease-out both;
+}
+
+/* View Transitions API (experimental.viewTransition) — short crossfade. */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 180ms;
+    animation-timing-function: ease-out;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -208,8 +233,8 @@
      text-sm     14px  nav, chips (≥44px), buttons, list primary lines
      text-meta   13px  labels, eyebrows, units, secondary lines
      text-xs     12px  captions, deal notes, fine print
-   Widths: page-wide (1200) browse/stall detail; page-narrow (640)
-   stalls list, cart, order, profile.
+   Widths: page-wide (1200, pad 20/32/48) browse shell; page-narrow (640)
+   stalls list (mobile), cart, order, profile.
    Spacing: page headers pt-8 + lede pt-3; major sections gap-12 with a
    cobble rule before the whole-market catalogue; product shelf gap-x-4/5
    gap-y-9/10; card caption stack gap-0.5 after pt-4.
@@ -263,11 +288,9 @@
   line-height: 1.45;
 }
 
-/* Browse shell (header + market grid). Forms stay on page-narrow. */
+/* Browse shell: 1200px max, padding 20 / 32 / 48. Forms use page-narrow. */
 @utility page-wide {
-  margin-inline: auto;
-  width: 100%;
-  max-width: 75rem;
+  @apply mx-auto w-full max-w-[75rem] px-5 sm:px-8 lg:px-12;
 }
 
 @utility page-narrow {
@@ -300,7 +323,15 @@
   }
 
   .cart-count-bump,
-  .cart-bar-enter {
+  .cart-bar-enter,
+  .page-enter {
     animation: none !important;
+  }
+
+  @supports (view-transition-name: none) {
+    ::view-transition-old(root),
+    ::view-transition-new(root) {
+      animation: none !important;
+    }
   }
 }
