@@ -69,12 +69,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => {
       const existing = prev.find((item) => item.productId === productId);
       if (existing) {
+        const nextQty = existing.qty + qty;
+        if (nextQty <= 0) {
+          return prev.filter((item) => item.productId !== productId);
+        }
         return prev.map((item) =>
-          item.productId === productId
-            ? { ...item, qty: item.qty + qty }
-            : item
+          item.productId === productId ? { ...item, qty: nextQty } : item
         );
       }
+      if (qty <= 0) return prev;
       return [...prev, { productId, qty }];
     });
   }, []);

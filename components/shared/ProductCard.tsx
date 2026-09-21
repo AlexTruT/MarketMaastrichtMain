@@ -59,7 +59,8 @@ export function ProductCard({ product, stallName, today }: ProductCardProps) {
           <PriceCard
             min={min}
             max={max}
-            oldPriceCents={deal ? product.price_min_cents : undefined}
+            oldMin={deal ? product.price_min_cents : undefined}
+            oldMax={deal ? product.price_max_cents : undefined}
             dealNote={deal ? product.deal_note ?? undefined : undefined}
           />
           {cartItem ? (

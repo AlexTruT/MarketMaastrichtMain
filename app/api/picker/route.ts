@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { supabase } from "@/lib/supabase";
 import type { PickerOrder } from "@/lib/types";
 
+// This is polled every 5s from /picker, so it must never serve a cached
+// response — a stale list would hide new orders from the shopper.
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   const { data, error } = await supabase
     .from("orders")
@@ -12,7 +16,11 @@ export async function GET() {
     .order("id", { ascending: true });
 
   if (error) {
-    return NextResponse.json({ error: error.message }, { status: 500 });
+    console.error("GET /api/picker failed:", error);
+    return NextResponse.json(
+      { error: "Could not load orders." },
+      { status: 500 }
+    );
   }
 
   return NextResponse.json({ orders: (data ?? []) as PickerOrder[] });
