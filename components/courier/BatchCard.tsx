@@ -8,6 +8,7 @@ import {
   stopItemCount,
 } from "@/lib/courier";
 import { HandlingPills } from "./HandlingPills";
+import { Lock } from "lucide-react";
 
 export function BatchCard({
   batch,
@@ -31,36 +32,36 @@ export function BatchCard({
           aria-hidden
         />
         <div className="min-w-0 flex-1">
-          <h3 className="text-lg leading-tight font-bold">{batch.title}</h3>
+          <h3 className="display-sm">{batch.title}</h3>
           <p className="mt-1 text-xs leading-relaxed text-ink-soft">
             {batch.description}
           </p>
         </div>
-        <span className="shrink-0 -rotate-2 rounded-xs bg-price-yellow px-2.5 py-1 font-price text-lg leading-none">
+        <span className="price-sign shrink-0 text-lg leading-none">
           {formatEuro(batch.payoutCents)}
         </span>
       </div>
 
       <dl className="mx-4 mt-4 grid grid-cols-3 divide-x divide-cobble rounded-xl bg-canvas py-2.5 text-center">
         <div className="px-1">
-          <dt className="text-[10px] font-semibold tracking-wide text-ink-faint uppercase">
+          <dt className="text-[11px] text-ink-faint">
             Drops
           </dt>
-          <dd className="text-sm font-bold">{batch.stops.length}</dd>
+          <dd className="text-sm font-semibold">{batch.stops.length}</dd>
         </div>
         <div className="px-1">
-          <dt className="text-[10px] font-semibold tracking-wide text-ink-faint uppercase">
+          <dt className="text-[11px] text-ink-faint">
             Ride
           </dt>
-          <dd className="text-sm font-bold">
+          <dd className="text-sm font-semibold">
             {formatDistance(batch.distanceMeters)}
           </dd>
         </div>
         <div className="px-1">
-          <dt className="text-[10px] font-semibold tracking-wide text-ink-faint uppercase">
+          <dt className="text-[11px] text-ink-faint">
             Time
           </dt>
-          <dd className="text-sm font-bold">{batch.etaMinutes} min</dd>
+          <dd className="text-sm font-semibold">{batch.etaMinutes} min</dd>
         </div>
       </dl>
 
@@ -83,6 +84,7 @@ export function BatchCard({
                 {stopItemCount(stop)}{" "}
                 {stopItemCount(stop) === 1 ? "item" : "items"} ·{" "}
                 {stop.deliveryWindow}
+                {stop.source === "live" ? " · live" : stop.source === "demo" ? " · demo" : ""}
               </p>
             </div>
             <span className="shrink-0 rounded-md bg-canvas px-1.5 py-0.5 text-[10px] font-semibold text-ink-soft">
@@ -93,7 +95,7 @@ export function BatchCard({
       </ol>
 
       <p className="flex items-start gap-1.5 px-4 pt-3 text-[11px] leading-relaxed text-ink-faint">
-        <span aria-hidden>🔒</span>
+        <Lock aria-hidden className="mt-px size-3.5 shrink-0" />
         Door numbers and names unlock once the crate is yours, one drop at a time.
       </p>
 

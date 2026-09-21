@@ -12,36 +12,30 @@ export function SellerProfileHeader({ stall }: { stall: Stall }) {
   return (
     <header className="flex flex-col gap-7">
       <div>
-        <p className="text-[0.8125rem] text-awning">
-          Seller · {stall.zone}
-        </p>
+        <p className="text-meta text-awning">Seller · {stall.zone}</p>
         <h1 className="display-lg pt-1">{stall.owner}</h1>
-        <p className="pt-1 text-[0.9375rem] text-ink/60">
+        <p className="text-meta pt-1.5 text-ink/55">
           {stall.name} · {stall.years_at_market} years on the Markt
         </p>
       </div>
 
       <section className="border-l-2 border-awning/25 pl-5">
-        <h2 className="text-[0.8125rem] text-ink/50">From the stallholder</h2>
-        <p className="max-w-[56ch] pt-3 text-[1.0625rem] leading-relaxed text-ink/90">
-          {stall.story}
-        </p>
+        <h2 className="text-meta text-ink/50">From the stallholder</h2>
+        <p className="text-lede max-w-[56ch] pt-2.5 text-ink/90">{stall.story}</p>
       </section>
 
       <dl className="grid grid-cols-3 gap-4 border-t border-cobble pt-5">
         <div>
-          <dt className="text-[0.8125rem] text-ink/50">From</dt>
-          <dd className="pt-1 text-[0.9375rem] font-medium">{stall.origin}</dd>
+          <dt className="text-meta text-ink/50">From</dt>
+          <dd className="pt-1 text-sm font-medium">{stall.origin}</dd>
         </div>
         <div>
-          <dt className="text-[0.8125rem] text-ink/50">Distance</dt>
-          <dd className="pt-1 text-[0.9375rem] font-medium tabular-nums">
-            {distance}
-          </dd>
+          <dt className="text-meta text-ink/50">Distance</dt>
+          <dd className="pt-1 text-sm font-medium tabular-nums">{distance}</dd>
         </div>
         <div>
-          <dt className="text-[0.8125rem] text-ink/50">On the Markt</dt>
-          <dd className="pt-1 text-[0.9375rem] font-medium tabular-nums">
+          <dt className="text-meta text-ink/50">On the Markt</dt>
+          <dd className="pt-1 text-sm font-medium tabular-nums">
             {stall.years_at_market} years
           </dd>
         </div>

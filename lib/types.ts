@@ -59,6 +59,11 @@ export type Order = {
   note: string | null;
   subtotal_min_cents: number;
   subtotal_max_cents: number;
+  /** 15% online markup snapshot on subtotal_min at order time. */
+  markup_min_cents: number;
+  /** 15% online markup snapshot on subtotal_max at order time. */
+  markup_max_cents: number;
+  /** Fulfilment only: home delivery or free pickup (not markup). */
   fee_cents: number;
   status: OrderStatus;
 };
@@ -70,6 +75,8 @@ export type OrderItem = {
   qty: number;
   unit_min_cents: number;
   unit_max_cents: number;
+  /** Settled unit price after pick; null until set. Requires migration. */
+  actual_unit_cents: number | null;
   picked: boolean;
   substitute_note: string | null;
 };

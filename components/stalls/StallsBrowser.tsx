@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { StallRow, type StallListItem } from "@/components/stalls/StallRow";
-import { ZONE_ORDER } from "@/components/map/MarktPlan";
 import type { Zone } from "@/lib/types";
 import { cn } from "@/lib/utils";
+
+const ZONE_ORDER: Zone[] = ["Stadhuis", "Boschstraat", "Mosae Forum"];
 
 type ZoneFilter = "all" | Zone;
 
@@ -29,7 +30,7 @@ export function StallsBrowser({ stalls }: { stalls: StallListItem[] }) {
 
   return (
     <div className="flex flex-col">
-      <div className="mx-auto flex w-full max-w-[760px] flex-col gap-3 px-4 pt-5">
+      <div className="flex flex-col gap-3 px-4 pt-5">
         <label className="relative block">
           <span className="sr-only">Search stalls</span>
           <span
@@ -43,7 +44,7 @@ export function StallsBrowser({ stalls }: { stalls: StallListItem[] }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by stall, origin or zone…"
-            className="h-11 w-full rounded-md border border-cobble bg-paper pr-3 pl-10 text-[0.9375rem] text-ink placeholder:text-ink/40"
+            className="h-11 w-full rounded-md border border-cobble bg-paper pr-3 pl-10 text-sm text-ink placeholder:text-ink/40"
           />
         </label>
 
@@ -68,7 +69,7 @@ export function StallsBrowser({ stalls }: { stalls: StallListItem[] }) {
         </div>
       </div>
 
-      <p className="mx-auto w-full max-w-[760px] px-4 pt-4 text-[0.8125rem] text-ink/50">
+      <p className="text-meta px-4 pt-4 text-ink/50">
         {filtered.length === stalls.length
           ? `${stalls.length} partner stalls`
           : `${filtered.length} of ${stalls.length} stalls`}
@@ -77,11 +78,11 @@ export function StallsBrowser({ stalls }: { stalls: StallListItem[] }) {
       </p>
 
       {filtered.length === 0 ? (
-        <p className="mx-auto w-full max-w-[760px] px-4 py-10 text-[0.9375rem] text-ink/55">
+        <p className="text-lede px-4 py-10 text-ink/55">
           No stalls match that search. Try another name, origin or zone.
         </p>
       ) : (
-        <ul className="mx-auto mt-1 flex w-full max-w-[760px] flex-col px-4 pb-4">
+        <ul className="mt-1 flex flex-col px-4 pb-4">
           {filtered.map((stall) => (
             <StallRow key={stall.id} stall={stall} />
           ))}
@@ -106,10 +107,10 @@ function ZoneChip({
       onClick={onClick}
       aria-pressed={active}
       className={cn(
-        "flex h-11 shrink-0 items-center rounded-md px-3 text-[0.8125rem] font-medium transition-colors",
+        "flex h-11 shrink-0 items-center rounded-full px-3.5 text-sm transition-colors",
         active
-          ? "bg-awning text-paper"
-          : "bg-cobble/60 text-ink/70 hover:bg-cobble"
+          ? "bg-awning font-medium text-paper"
+          : "bg-cobble/55 text-ink/70 hover:bg-cobble"
       )}
     >
       {label}

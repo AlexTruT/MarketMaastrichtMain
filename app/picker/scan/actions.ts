@@ -4,6 +4,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { revalidatePath } from "next/cache";
 import { supabase } from "@/lib/supabase";
 import { getProductsByStall } from "@/lib/data";
+import { requirePickerAccess } from "@/lib/picker-auth";
 import type { Product } from "@/lib/types";
 
 type ScannedItem = {
@@ -111,16 +112,44 @@ export async function scanPriceBoard(
 export async function updatePrices(
   updates: { productId: number; priceCents: number }[]
 ): Promise<{ ok: true } | { error: string }> {
+  const gate = await requirePickerAccess();
+  if (gate) return gate;
+
+  if (!Array.isArray(updates) || updates.length === 0) {
+    return { error: "Nothing to update." };
+  }
+
   try {
     for (const update of updates) {
-      const { error } = await supabase
+      if (
+        typeof update.productId !== "number" ||
+        !Number.isInteger(update.productId) ||
+        update.productId <= 0
+      ) {
+        return { error: "Invalid product id." };
+      }
+      if (
+        typeof update.priceCents !== "number" ||
+        !Number.isInteger(update.priceCents) ||
+        !Number.isFinite(update.priceCents) ||
+        update.priceCents <= 0
+      ) {
+        return { error: "Prices must be positive whole-cent amounts." };
+      }
+
+      const { data, error } = await supabase
         .from("products")
         .update({
           price_min_cents: update.priceCents,
           price_max_cents: update.priceCents,
         })
-        .eq("id", update.productId);
+        .eq("id", update.productId)
+        .select("id")
+        .maybeSingle();
       if (error) throw error;
+      if (!data) {
+        return { error: `Unknown product #${update.productId}.` };
+      }
     }
     revalidatePath("/");
     return { ok: true };

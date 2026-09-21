@@ -68,6 +68,7 @@ const PHOTO_ALIAS: Record<string, string> = {
   "oyster-mushrooms": "mushrooms",
   "fresh-goat-cheese": "young-gouda",
   "aged-goat-cheese": "old-gouda",
+  quinces: "conference-pears",
 };
 
 /** Falls back to the category when a product has no photo of its own. */

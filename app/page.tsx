@@ -1,9 +1,8 @@
 import Image from "next/image";
 import { getProducts, getStalls } from "@/lib/data";
 import { getNextMarketFriday, isComingSoon, isDealActive } from "@/lib/pricing";
-import { ProductCard } from "@/components/shared/ProductCard";
-import { ProductShelf } from "@/components/shared/ProductShelf";
 import { ProductGrid } from "@/components/home/ProductGrid";
+import { MarketHighlights } from "@/components/home/MarketHighlights";
 import { MarketClock } from "@/components/home/MarketClock";
 import marketPhoto from "@/assets/vrijdagmarkt-groentekraam-maastricht-eighty8things_3475807105.webp";
 
@@ -47,7 +46,7 @@ export default async function HomePage() {
           />
         </div>
 
-        <div className="mx-auto w-full max-w-[1200px] px-4 pt-6">
+        <div className="page-wide px-4 pt-6">
           <h1 className="display-xl max-w-[14ch]">
             Someone walks the market for you
           </h1>
@@ -58,60 +57,19 @@ export default async function HomePage() {
               fallback="Opening"
             />
           </div>
-          <p className="pt-3 text-sm text-ink/55">
+          <p className="text-meta pt-3 text-ink/55">
             Next market {formatMarketDate(nextFriday)}, 09:00 to 15:00.
           </p>
         </div>
       </section>
 
-      <div className="mx-auto flex w-full max-w-[1200px] flex-col gap-10 px-4 pt-10 pb-4">
-        {(deals.length > 0 || comingSoon.length > 0) && (
-          <div className="flex flex-col gap-8">
-            {deals.length > 0 && (
-              <section>
-                <h2 className="display-lg text-maastricht-red">
-                  This week&apos;s deals
-                </h2>
-                <p className="pt-1 text-sm text-ink/55">
-                  Prices our shopper checked on the boards this morning.
-                </p>
-                <ProductShelf dense className="mt-5">
-                  {deals.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      stallName={
-                        product.stall_id ? stallNames[product.stall_id] : null
-                      }
-                      today={today}
-                    />
-                  ))}
-                </ProductShelf>
-              </section>
-            )}
-
-            {comingSoon.length > 0 && (
-              <section>
-                <h2 className="display-md">Not in season yet</h2>
-                <p className="pt-1 text-sm text-ink/55">
-                  The date on the card is the Friday it lands on the stall.
-                </p>
-                <ProductShelf dense className="mt-5">
-                  {comingSoon.map((product) => (
-                    <ProductCard
-                      key={product.id}
-                      product={product}
-                      stallName={
-                        product.stall_id ? stallNames[product.stall_id] : null
-                      }
-                      today={today}
-                    />
-                  ))}
-                </ProductShelf>
-              </section>
-            )}
-          </div>
-        )}
+      <div className="page-wide flex flex-col gap-10 px-4 pt-10 pb-4">
+        <MarketHighlights
+          deals={deals}
+          comingSoon={comingSoon}
+          stallNames={stallNames}
+          today={today}
+        />
 
         <section>
           <h2 className="display-lg">The whole market</h2>

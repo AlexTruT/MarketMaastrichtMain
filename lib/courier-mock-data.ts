@@ -23,7 +23,7 @@ export const COURIER_PROFILES: CourierProfile[] = [
     firstName: "Alex",
     role: "Student courier, Zuyd",
     vehicle: "Urban Arrow cargo e-bike",
-    avatar: "🚴",
+    avatar: "/couriers/alex.jpg",
     preferredCluster: "centrum_wyck",
   },
   {
@@ -32,7 +32,7 @@ export const COURIER_PROFILES: CourierProfile[] = [
     firstName: "Emma",
     role: "Student courier, UM",
     vehicle: "Gazelle HeavyDuty e-bike",
-    avatar: "🚲",
+    avatar: "/couriers/emma.jpg",
     preferredCluster: "ceramique_randwyck",
   },
   {
@@ -41,7 +41,7 @@ export const COURIER_PROFILES: CourierProfile[] = [
     firstName: "Lucas",
     role: "Student courier, UM",
     vehicle: "Bakfiets e-cargo classic",
-    avatar: "🛴",
+    avatar: "/couriers/lucas.jpg",
     preferredCluster: "brusselsepoort_belfort",
   },
 ];
@@ -327,15 +327,15 @@ export const DEMO_STOPS: DeliveryStop[] = [
     packageNumber: "BAG-1047",
     crateNumber: "CR-CERAM-02",
     cluster: "ceramique_randwyck",
-    fulfilment: "pickup",
+    fulfilment: "home",
     deliveryWindow: "13:00 to 14:00",
     customerName: "Elena Rostova",
     customerPhone: "+31655443322",
-    address: "Randwyck campus, Universiteitssingel 40",
-    areaLabel: "Randwyck campus pickup point",
-    addressHint: "Pickup point: faculty reception lockers",
+    address: "Universiteitssingel 40",
+    areaLabel: "Randwyck, student flats",
+    addressHint: "Flat 3B — buzz Elena, leave at door if no answer",
     coords: [50.83655, 5.71555],
-    deliveryNotes: "Hand the crate to the reception desk and note the locker number.",
+    deliveryNotes: "Cold bag stays upright. Text on arrival.",
     substitution: "skip",
     handling: ["cold"],
     items: [
@@ -605,21 +605,18 @@ export const INCOMING_STOP_TEMPLATES: Array<
 
 export const HANDLING_LABELS: Record<
   "cold" | "fragile" | "floral",
-  { label: string; emoji: string; className: string }
+  { label: string; className: string }
 > = {
   cold: {
     label: "Cold bag",
-    emoji: "❄️",
     className: "bg-sky-50 text-sky-800 ring-sky-200",
   },
   fragile: {
     label: "Fragile",
-    emoji: "🥚",
     className: "bg-amber-50 text-amber-900 ring-amber-200",
   },
   floral: {
     label: "Flowers",
-    emoji: "💐",
     className: "bg-emerald-50 text-emerald-900 ring-emerald-200",
   },
 };

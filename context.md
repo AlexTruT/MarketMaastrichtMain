@@ -21,17 +21,19 @@ This is a hackathon demo built in 5 hours. It must work end to end on a phone an
 - Order cutoff: Friday 10:00. Show the cutoff on the home page.
 - Delivery windows: "12:00 to 13:00", "13:00 to 14:00", "14:00 to 15:00".
 - Fulfilment:
-  - Home delivery: fee €5.95
-  - Pickup point: fee €1.95. Points: "Randwyck campus", "Buurtcentrum Malberg", "Merret stand, Markt"
+  - Home delivery: fee €4.50
+  - Pickup: free (€0). Only at "Merret stand, Markt" (on the Markt).
 - Substitution choice per order: "substitute" (shopper picks closest match), "skip" (leave it out), "call" (phone me).
 - Pricing:
   - Partner stall items have a fixed price: `price_min_cents = price_max_cents`.
   - General market items (stall_id null) have a range. Show "€1.50 to €2.00". Label them "Picked by our shopper at the best stall of the day".
   - Cart and checkout show the subtotal as a range when any item is ranged: "€23.40 to €25.10". Otherwise a single number.
+  - Online / service markup: always 15% of the grocery subtotal (`Math.round(subtotal * 0.15)`), for both home and pickup. Shown separately from delivery. Stored as `markup_min_cents` / `markup_max_cents`.
+  - Customer total = grocery subtotal + 15% markup + fulfilment fee (`fee_cents` is delivery only).
+  - Stall catalogue prices stay as stall prices; markup is a separate line, not baked into unit snapshots.
 - Deals:
   - `deal_price_cents` not null and (`deal_starts_on` null or today or earlier) = active deal. Use deal price, show old price struck through, show `deal_note`.
   - `deal_starts_on` in the future = "Coming soon". Show in its own strip with the date. Not addable to cart.
-- Stall prices on the site are the prices at the stall. We never mark up products. Our only revenue shown to the customer is the fee.
 
 ## Stack
 
@@ -54,7 +56,7 @@ This is a hackathon demo built in 5 hours. It must work end to end on a phone an
 
 - `lib/supabase.ts` server client
 - `lib/types.ts` types matching `supabase.sql`
-- `lib/pricing.ts`: `formatEuro(cents)`, `isDealActive(product, today)`, `isComingSoon(product, today)`, `unitRange(product, today) -> {min, max}`, `formatRange(min, max)`, `feeFor(fulfilment)`
+- `lib/pricing.ts`: `formatEuro(cents)`, `isDealActive(product, today)`, `isComingSoon(product, today)`, `unitRange(product, today) -> {min, max}`, `formatRange(min, max)`, `feeFor(fulfilment)`, `markupCents(subtotal)`, `orderTotals(...)`
 - `lib/cart.tsx` cart context: `items`, `add(productId, qty)`, `remove`, `setQty`, `clear`, `count`
 - `app/layout.tsx`, `app/globals.css`, fonts, design tokens
 
@@ -62,15 +64,17 @@ This is a hackathon demo built in 5 hours. It must work end to end on a phone an
 
 | Route | Owner | What it does |
 |---|---|---|
-| `/` | A | Next market date and cutoff line. Deals strip. Coming soon strip. Category chips (vegetables, fruit, fish, cheese, bakery, pantry, flowers, more). Product grid, 2 columns on mobile. Each card: emoji tile, name, unit, stall name, price card, add button with qty stepper. |
-| `/stalls` | C | List of partner stalls: emoji, name, owner, origin with km, years at the market. |
-| `/stalls/[id]` | C | Stall story, facts, and that stall's products using the same product card as `/`. |
-| `/map` | C | Static inline SVG of the Markt with three zones: Stadhuis (produce, cheese, bakery), Boschstraat (fish), Mosae Forum (flowers, eggs and honey). Each zone lists its partner stalls and links to them. |
+| `/` | A | Next market date and cutoff line. Deals strip. Coming soon strip. Category chips (vegetables, fruit, fish, cheese, bakery, pantry, flowers, more). Product grid, 2 columns on mobile. Each card: product photo tile, name, unit, stall name, price card, add button with qty stepper. |
+| `/stalls` | C | Partner stalls list: search, zone filter, market-scene thumb, zone tag, item count. Links to `/stalls/[id]`. |
+| `/stalls/[id]` | C | Seller profile for a partner stall: full-bleed market-scene hero, owner-led header, story, facts, then that stall's products using the same product card as `/`. Read-only; no vendor editing. |
 | `/cart` | B | Cart lines with qty stepper, subtotal (range aware). Checkout form on the same page: fulfilment toggle, address or pickup point, time window, substitution choice, name, phone, note. Fee and total. Submit button "Place order". Server action writes `orders` and `order_items` with price snapshots, clears cart, redirects. |
-| `/order/[id]` | B | Confirmation: "Order placed", number, window, where, items, total range, "Our shopper buys your order Friday morning". |
+| `/order/[id]` | B | Confirmation: "Order placed", number, window, where, items, total range, "Our shopper buys your order Friday morning". Link to `/profile` with the checkout phone prefilled. |
+| `/profile` | B | Buyer profile: enter phone, confirm a four-digit OTP, then look up recent orders (server-side via `lib/data.ts`). Demo cannot send SMS — show the code on the page. Session cookie after verify. |
+| `/courier` | — | Demo courier picker: Alex, Emma, Lucas. Mock shift data in the browser. |
+| `/courier/[id]` | — | Courier tool: hub crates, route map, shift earnings. Profile (name, avatar initials, vehicle, preferred cluster) in the top bar and Shift tab. |
 | `/picker` | C | Phone view for the shopper. Tab 1 "Shopping list": all items from orders with status new or picking, aggregated by product, grouped by zone then stall, e.g. "3 × Smoked mackerel". Big checkbox per line. Tab 2 "Orders": one card per order with window, fulfilment, substitution, note, and status buttons (picking, ready, out, delivered). Poll every 5 seconds via a route handler so a new order appears live. |
 
-Sticky bottom bar on `/`, `/stalls/*`, `/map`: item count, subtotal, "View cart". Hidden when cart is empty.
+Sticky bottom bar on `/`, `/stalls/*`: item count, subtotal, "View cart". Hidden when cart is empty.
 
 ## AI feature: price board scan (core, not optional)
 
@@ -106,13 +110,17 @@ Grounded in the Friday market itself: striped market awnings and hand-written fl
 
 **The one bold element:** every price is a small yellow price card, handwritten font, rotated -2deg, like the cardboard signs on the stalls. Deal prices get the same card with the old price struck through in small plain text above it. Everything else stays quiet.
 
+**Product photography:** every product has a real studio-style photo (plain paper-white background, soft shadow, shot from slightly above), not an emoji and not a flat illustration. One file per product at `public/produce/<key>.jpg`, `<key>` from `produceKey(name)` in `components/shared/Produce.tsx`. This is the one place the design intentionally allows a soft photographic shadow; everything else on the page stays flat.
+
+**Stall photography:** partner stalls use place-like market scenes (stalls, produce on the Markt, Stadhuis atmosphere) from `assets/` via `lib/stall-scenes.ts` — never the studio produce cutouts. List thumbs are rounded rectangles; detail pages use a full-bleed scene hero.
+
 **Layout**
 - Mobile first, designed at 390px, max content width 640px on desktop.
 - Left aligned. Generous spacing. Tap targets at least 44px.
-- Header: thin 8px green and white awning stripe at the very top, then "Merret" wordmark and nav (Market, Stalls, Map).
-- Product emoji sit on a light tinted square tile, not floating.
+- Header: "Merret" wordmark and nav (Market, Stalls, Profile).
+- Product photos sit on a plain paper tile with a hairline `cobble` ring, not floating and not tinted.
 - Border radius: 6px on cards and inputs. Price cards 2px.
-- No gradients, no drop shadows except a single subtle one on the sticky cart bar.
+- No gradients, no drop shadows on UI chrome, except the product photos themselves and a single subtle one on the sticky cart bar.
 - No page-load animations. Motion only on user actions (add to cart bump on the cart count).
 
 **Picker view** uses larger type (18px base), full-width rows, checkbox on the left, checked rows greyed and struck through.
@@ -128,7 +136,9 @@ Grounded in the Friday market itself: striped market awnings and hand-written fl
 
 ## Out of scope. Do not build.
 
-Login, accounts, order history, search, payment, real maps, vendor dashboard, admin, dark mode, i18n, emails, SMS, analytics, tests.
+Login, accounts, passwords, payment, maps, vendor dashboard, admin, dark mode, i18n, emails, SMS, analytics, tests.
+
+**Allowed demo exception:** `/profile` uses a four-digit phone OTP (code shown on-page, hashed in an httpOnly cookie). No SMS provider. After verify, a session cookie unlocks orders for that number. Not a full account system.
 
 ## Definition of done
 

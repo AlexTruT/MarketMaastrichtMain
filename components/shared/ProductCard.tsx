@@ -14,6 +14,8 @@ type ProductCardProps = {
   today: Date | string;
   /** Off on a stall's own page, where naming the stall on every tile is noise. */
   showSource?: boolean;
+  /** Compact for deals / coming-soon highlight shelves only. */
+  size?: "default" | "compact";
 };
 
 function formatStartDate(iso: string): string {
@@ -35,12 +37,17 @@ export function ProductCard({
   stallName,
   today,
   showSource = true,
+  size = "default",
 }: ProductCardProps) {
-  const { items, add, setQty } = useCart();
+  const { items, add, setQty, ready } = useCart();
   const deal = isDealActive(product, today);
   const comingSoon = isComingSoon(product, today);
   const { min, max } = unitRange(product, today);
-  const cartItem = items.find((item) => item.productId === product.id);
+  // Wait for localStorage cart so SSR (+) matches the first client paint.
+  const cartItem = ready
+    ? items.find((item) => item.productId === product.id)
+    : undefined;
+  const compact = size === "compact";
 
   return (
     <article className="flex min-w-0 flex-col">
@@ -50,7 +57,13 @@ export function ProductCard({
         </div>
 
         {comingSoon ? (
-          <span className="price-sign absolute -bottom-2.5 left-2 bg-cobble text-[1.1rem] leading-tight text-ink/70">
+          <span
+            className={
+              compact
+                ? "price-sign absolute -bottom-2 left-1.5 bg-cobble text-base leading-tight text-ink/70"
+                : "price-sign absolute -bottom-2.5 left-2 bg-cobble text-[1.25rem] leading-tight text-ink/70"
+            }
+          >
             {formatStartDate(product.deal_starts_on!)}
           </span>
         ) : (
@@ -59,13 +72,16 @@ export function ProductCard({
             max={max}
             oldMin={deal ? product.price_min_cents : undefined}
             oldMax={deal ? product.price_max_cents : undefined}
-            className="absolute -bottom-2.5 left-2"
+            size={compact ? "sm" : "md"}
+            className={
+              compact ? "absolute -bottom-2 left-1.5" : "absolute -bottom-2.5 left-2"
+            }
           />
         )}
 
         {!comingSoon &&
           (cartItem ? (
-            <div className="absolute top-1.5 right-1.5">
+            <div className={compact ? "absolute top-1 right-1" : "absolute top-1.5 right-1.5"}>
               <QtyStepper
                 name={product.name}
                 qty={cartItem.qty}
@@ -78,30 +94,40 @@ export function ProductCard({
               type="button"
               aria-label={`Add ${product.name} to your bag`}
               onClick={() => add(product.id)}
-              className="absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-full bg-awning text-lg leading-none text-paper shadow-sm transition-transform hover:scale-105 active:translate-y-px"
+              className={
+                compact
+                  ? "absolute top-1 right-1 grid size-9 place-items-center rounded-full bg-awning text-base leading-none text-paper shadow-sm transition-transform hover:scale-105 active:translate-y-px"
+                  : "absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-full bg-awning text-lg leading-none text-paper shadow-sm transition-transform hover:scale-105 active:translate-y-px"
+              }
             >
               +
             </button>
           ))}
       </div>
 
-      <div className="min-w-0 pt-5">
+      <div
+        className={
+          compact
+            ? "flex min-w-0 flex-col gap-0.5 pt-3"
+            : "flex min-w-0 flex-col gap-0.5 pt-4"
+        }
+      >
         <h3 className="display-sm truncate">{product.name}</h3>
-        <p className="text-[0.8125rem] text-ink/55">{product.unit}</p>
+        <p className="text-meta text-ink/55">{product.unit}</p>
         {deal && product.deal_note ? (
-          <p className="mt-0.5 line-clamp-2 text-xs text-maastricht-red">
+          <p className="line-clamp-2 text-xs text-maastricht-red">
             {product.deal_note}
           </p>
         ) : null}
         {!showSource ? null : product.stall_id && stallName ? (
           <Link
             href={`/stalls/${product.stall_id}`}
-            className="mt-0.5 block truncate text-xs text-awning underline decoration-awning/30 underline-offset-2 hover:decoration-awning"
+            className="block truncate text-xs text-awning underline decoration-awning/30 underline-offset-2 hover:decoration-awning"
           >
             {stallName}
           </Link>
         ) : (
-          <p className="mt-0.5 text-xs leading-snug text-ink/45">
+          <p className="text-xs leading-snug text-ink/45">
             Picked by our shopper at the best stall of the day
           </p>
         )}

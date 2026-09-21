@@ -28,7 +28,7 @@ function signText(min: number, max: number): string {
 
 const SIZES = {
   sm: "text-base",
-  md: "text-[1.2rem]",
+  md: "text-[1.25rem]",
   lg: "text-[1.75rem]",
 } as const;
 

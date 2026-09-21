@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { formatEuro } from "@/lib/pricing";
 import type { Stall } from "@/lib/types";
+import { PickerGate } from "@/components/picker/PickerGate";
 import { scanPriceBoard, updatePrices, type ReviewRow } from "./actions";
 
 function fileToBase64(file: File): Promise<{ data: string; mediaType: string }> {
@@ -82,8 +83,9 @@ export function ScanForm({ stalls }: { stalls: Stall[] }) {
   }
 
   return (
+    <PickerGate>
     <div className="flex flex-col gap-4 p-4 text-[18px]">
-      <h1 className="text-2xl font-bold">Scan price board</h1>
+      <h1 className="display-lg">Scan price board</h1>
 
       <div className="flex flex-col gap-2">
         <label className="text-sm font-medium" htmlFor="stall">
@@ -118,7 +120,7 @@ export function ScanForm({ stalls }: { stalls: Stall[] }) {
 
       {rows && (
         <div className="flex flex-col gap-3">
-          <h2 className="text-lg font-bold">Review</h2>
+          <h2 className="display-md">Review</h2>
           {rows.length === 0 && (
             <p className="text-muted-foreground">
               Could not find any prices on that photo. Try again closer to the
@@ -174,5 +176,6 @@ export function ScanForm({ stalls }: { stalls: Stall[] }) {
         </div>
       )}
     </div>
+    </PickerGate>
   );
 }

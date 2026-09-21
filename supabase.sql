@@ -49,7 +49,9 @@ create table orders (
   note text,
   subtotal_min_cents int not null default 0,
   subtotal_max_cents int not null default 0,
-  fee_cents int not null,
+  markup_min_cents int not null default 0,       -- 15% online markup on subtotal_min
+  markup_max_cents int not null default 0,       -- 15% online markup on subtotal_max
+  fee_cents int not null,                        -- fulfilment only (home 450 / pickup 0)
   status text not null default 'new' check (status in ('new','picking','ready','out','delivered'))
 );
 
@@ -60,6 +62,7 @@ create table order_items (
   qty int not null check (qty > 0),
   unit_min_cents int not null,                  -- price snapshot at order time
   unit_max_cents int not null,
+  actual_unit_cents int check (actual_unit_cents is null or actual_unit_cents >= 0),
   picked boolean not null default false,
   substitute_note text
 );
@@ -80,7 +83,19 @@ insert into stalls values
 ('heuvelland', 'Eierhoeve Heuvelland', 'Lotte', 'pantry', 'Mosae Forum', 'Gulpen', 16, 6,
  'Lotte keeps 400 hens on open pasture near Gulpen and bees along the Geul. Eggs are never more than two days old.', '🥚'),
 ('mosae', 'Bloemen bij Mosae', 'Anouk', 'flowers', 'Mosae Forum', 'Growers around Venlo', 70, 11,
- 'Anouk buys from growers around Venlo and arranges every bouquet at the stall. Sunflowers until the first frost.', '💐');
+ 'Anouk buys from growers around Venlo and arranges every bouquet at the stall. Sunflowers until the first frost.', '💐'),
+('olijf', 'Olijfolie van Pedro', 'Pedro', 'pantry', 'Stadhuis', 'Andalusia, Spain', null, 8,
+ 'Pedro presses olives on his family''s grove near Córdoba and drives a van north every Thursday. Ask him which harvest the bottle is from.', '🫒'),
+('paddestoel', 'Paddenstoelen van Maarten', 'Maarten', 'vegetables', 'Stadhuis', 'Meerssen', 8, 5,
+ 'Maarten grows chestnut and oyster mushrooms in a cool shed behind the house in Meerssen. Picked the morning of market day.', '🍄'),
+('moestuin', 'Moestuin Valkenburg', 'Iris', 'vegetables', 'Stadhuis', 'Valkenburg aan de Geul', 14, 7,
+ 'Iris runs a small kitchen garden above the Geul. Peppers, onions and courgettes come up the same morning she packs the crates.', '🫑'),
+('kruiden', 'Kruiden van An', 'An', 'flowers', 'Mosae Forum', 'Beek', 10, 4,
+ 'An sells pot herbs and cut bunches from her greenhouse in Beek. Basil and parsley go first; ask if you need something less common.', '🌿'),
+('speciaal', 'Limburgse Specialiteiten', 'Piet', 'pantry', 'Stadhuis', 'Nuth', 18, 15,
+ 'Piet bottles Limburgse stroop and apple juice from orchards around Nuth. The krentenmik comes from a baker two villages over.', '🍯'),
+('geit', 'Geitenkaas van Marieke', 'Marieke', 'cheese', 'Stadhuis', 'Epen', 22, 6,
+ 'Marieke milks thirty goats on the plateau above Epen. Soft cheese on Friday, aged rounds when she has them.', '🐐');
 
 -- Products: partner stalls (fixed prices) -----------------------------------
 
@@ -119,7 +134,36 @@ insert into products (id, stall_id, name, unit, category, price_min_cents, price
 (27, 'heuvelland', 'Limburgse stroop', '450 g jar', 'pantry', 395, 395, null, null, null, '🍯', 3),
 
 (28, 'mosae', 'Sunflowers', 'bunch of 5', 'flowers', 500, 500, null, null, null, '🌻', 1),
-(29, 'mosae', 'Seasonal bouquet', 'per bouquet', 'flowers', 1000, 1000, null, null, null, '💐', 2);
+(29, 'mosae', 'Seasonal bouquet', 'per bouquet', 'flowers', 1000, 1000, null, null, null, '💐', 2),
+
+(38, 'olijf', 'Extra virgin olive oil', '500 ml bottle', 'pantry', 895, 895, null, null, null, '🫒', 1),
+(39, 'olijf', 'Garlic', '3 bulbs', 'pantry', 125, 125, null, null, null, '🧄', 2),
+(40, 'olijf', 'Fresh herbs', 'per bunch', 'pantry', 150, 150, null, null, null, '🌿', 3),
+
+(41, 'paddestoel', 'Chestnut mushrooms', '400 g', 'vegetables', 375, 375, null, null, null, '🍄', 1),
+(42, 'paddestoel', 'Oyster mushrooms', '250 g', 'vegetables', 325, 325, null, null, null, '🍄', 2),
+(43, 'paddestoel', 'Spinach', '500 g', 'vegetables', 250, 250, null, null, null, '🥬', 3),
+
+(44, 'moestuin', 'Bell peppers', '3 pieces', 'vegetables', 225, 225, null, null, null, '🫑', 1),
+(45, 'moestuin', 'Onions', 'per kg', 'vegetables', 140, 140, null, null, null, '🧅', 2),
+(46, 'moestuin', 'Courgette', 'per piece', 'vegetables', 95, 95, null, null, null, '🥒', 3),
+(47, 'moestuin', 'Carrots', 'per kg', 'vegetables', 180, 180, null, null, null, '🥕', 4),
+
+(48, 'kruiden', 'Fresh herbs', 'per pot', 'flowers', 275, 275, null, null, null, '🌿', 1),
+(49, 'kruiden', 'Seasonal bouquet', 'per bouquet', 'flowers', 850, 850, null, null, null, '💐', 2),
+(50, 'kruiden', 'Sunflowers', 'bunch of 5', 'flowers', 450, 450, null, null, null, '🌻', 3),
+
+(51, 'speciaal', 'Limburgse stroop', '450 g jar', 'pantry', 395, 395, null, null, null, '🍯', 1),
+(52, 'speciaal', 'Wildflower honey', '450 g jar', 'pantry', 750, 750, null, null, null, '🍯', 2),
+(53, 'speciaal', 'Apple juice', '1 litre', 'pantry', 325, 325, null, null, null, '🧃', 3),
+(54, 'speciaal', 'Krentenmik', 'per loaf', 'bakery', 425, 425, null, null, null, '🍞', 4),
+
+(55, 'geit', 'Fresh goat cheese', '200 g', 'cheese', 475, 475, null, null, null, '🧀', 1),
+(56, 'geit', 'Aged goat cheese', '200 g', 'cheese', 625, 625, null, null, null, '🧀', 2),
+(57, 'geit', 'Young Gouda', '500 g', 'cheese', 695, 695, null, null, null, '🧀', 3),
+
+-- Coming soon (deal_starts_on in the future): pairs with Hokkaido for a 2-up strip
+(58, 'kersenhoek', 'Quinces', 'per kg', 'fruit', 320, 320, 240, 'First crates from the orchard', '2026-10-16', '🍐', 5);
 
 -- Products: rest of the market (price range, our shopper picks the best offer) --
 
@@ -136,14 +180,14 @@ insert into products (id, stall_id, name, unit, category, price_min_cents, price
 -- Demo orders so the picker view is not empty --------------------------------
 
 insert into orders (id, customer_name, phone, fulfilment, address, pickup_point, time_window, substitution, note, fee_cents) values
-(1, 'Maria', '06 1234 5601', 'home', 'Scharnerweg 12', null, '12:00 to 13:00', 'call', 'Please ring twice, I need a moment to get to the door', 595),
-(2, 'Daan', '06 1234 5602', 'pickup', null, 'Randwyck campus', '13:00 to 14:00', 'substitute', null, 195),
-(3, 'Fatima', '06 1234 5603', 'home', 'Tongersestraat 44', null, '13:00 to 14:00', 'skip', null, 595),
-(4, 'Jan', '06 1234 5604', 'home', 'Oranjeplein 8', null, '12:00 to 13:00', 'call', 'Leave with neighbour at number 10', 595),
-(5, 'Sophie', '06 1234 5605', 'pickup', null, 'Randwyck campus', '14:00 to 15:00', 'substitute', null, 195),
-(6, 'Tom', '06 1234 5606', 'pickup', null, 'Buurtcentrum Malberg', '13:00 to 14:00', 'substitute', null, 195),
-(7, 'Els', '06 1234 5607', 'home', 'Brusselsestraat 71', null, '14:00 to 15:00', 'call', null, 595),
-(8, 'Yusuf', '06 1234 5608', 'pickup', null, 'Merret stand, Markt', '12:00 to 13:00', 'skip', null, 195);
+(1, 'Maria', '06 1234 5601', 'home', 'Scharnerweg 12', null, '12:00 to 13:00', 'call', 'Please ring twice, I need a moment to get to the door', 450),
+(2, 'Daan', '06 1234 5602', 'pickup', null, 'Merret stand, Markt', '13:00 to 14:00', 'substitute', null, 0),
+(3, 'Fatima', '06 1234 5603', 'home', 'Tongersestraat 44', null, '13:00 to 14:00', 'skip', null, 450),
+(4, 'Jan', '06 1234 5604', 'home', 'Oranjeplein 8', null, '12:00 to 13:00', 'call', 'Leave with neighbour at number 10', 450),
+(5, 'Sophie', '06 1234 5605', 'pickup', null, 'Merret stand, Markt', '14:00 to 15:00', 'substitute', null, 0),
+(6, 'Tom', '06 1234 5606', 'pickup', null, 'Merret stand, Markt', '13:00 to 14:00', 'substitute', null, 0),
+(7, 'Els', '06 1234 5607', 'home', 'Brusselsestraat 71', null, '14:00 to 15:00', 'call', null, 450),
+(8, 'Yusuf', '06 1234 5608', 'pickup', null, 'Merret stand, Markt', '12:00 to 13:00', 'skip', null, 0);
 
 insert into order_items (order_id, product_id, qty, unit_min_cents, unit_max_cents) values
 (1, 1, 1, 350, 350), (1, 6, 1, 150, 150), (1, 25, 1, 395, 395), (1, 22, 2, 325, 325),
@@ -158,5 +202,9 @@ insert into order_items (order_id, product_id, qty, unit_min_cents, unit_max_cen
 update orders o set
   subtotal_min_cents = (select coalesce(sum(qty * unit_min_cents), 0) from order_items where order_id = o.id),
   subtotal_max_cents = (select coalesce(sum(qty * unit_max_cents), 0) from order_items where order_id = o.id);
+
+update orders set
+  markup_min_cents = round(subtotal_min_cents * 0.15)::int,
+  markup_max_cents = round(subtotal_max_cents * 0.15)::int;
 
 select setval('orders_id_seq', (select max(id) from orders));

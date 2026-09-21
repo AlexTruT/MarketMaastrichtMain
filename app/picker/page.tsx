@@ -7,7 +7,10 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import type { OrderStatus, PickerOrder } from "@/lib/types";
-import { setOrderStatus, setProductPicked } from "./actions";
+import { PickerGate } from "@/components/picker/PickerGate";
+import { setOrderItemActual, setOrderStatus, setProductPicked } from "./actions";
+import { toast } from "sonner";
+import { formatEuro } from "@/lib/pricing";
 
 const POLL_MS = 5000;
 const ZONE_ORDER = ["Stadhuis", "Boschstraat", "Mosae Forum", "General market"];
@@ -83,6 +86,10 @@ export default function PickerPage() {
   const fetchOrders = useCallback(async () => {
     try {
       const res = await fetch("/api/picker", { cache: "no-store" });
+      if (res.status === 401) {
+        setOrders([]);
+        return;
+      }
       const data = await res.json();
       setOrders(data.orders ?? []);
     } finally {
@@ -120,9 +127,26 @@ export default function PickerPage() {
     fetchOrders();
   }
 
+  async function handleActual(orderItemId: number, euroInput: string) {
+    const euros = Number(euroInput.replace(",", "."));
+    if (!Number.isFinite(euros) || euros < 0) {
+      toast.error("Enter a valid euro amount.");
+      return;
+    }
+    const cents = Math.round(euros * 100);
+    const result = await setOrderItemActual(orderItemId, cents);
+    if ("error" in result) {
+      toast.error(result.error);
+      return;
+    }
+    toast.success("Actual price saved");
+    fetchOrders();
+  }
+
   return (
+    <PickerGate>
     <div className="flex flex-1 flex-col p-4 text-[18px]">
-      <h1 className="mb-4 text-2xl font-bold">Picker</h1>
+      <h1 className="display-lg mb-5">Picker</h1>
 
       <Tabs defaultValue="list" className="flex flex-1 flex-col">
         <TabsList className="w-full">
@@ -141,9 +165,7 @@ export default function PickerPage() {
           )}
           {shoppingList.map((group) => (
             <section key={group.zone} className="flex flex-col gap-3">
-              <h2 className="text-sm font-bold uppercase tracking-wide text-awning">
-                {group.zone}
-              </h2>
+              <h2 className="display-md text-awning">{group.zone}</h2>
               {group.stalls.map((stall) => (
                 <div key={stall.stallName} className="flex flex-col">
                   <h3 className="mb-1 text-sm font-medium text-muted-foreground">
@@ -200,6 +222,55 @@ export default function PickerPage() {
               </p>
               <p>Substitution: {order.substitution}</p>
               {order.note && <p className="text-muted-foreground">Note: {order.note}</p>}
+              <ul className="mt-1 flex flex-col gap-2 text-sm">
+                {order.order_items.map((item) => {
+                  const ranged = item.unit_min_cents !== item.unit_max_cents;
+                  if (!ranged) return null;
+                  return (
+                    <li
+                      key={item.id}
+                      className="flex flex-wrap items-center gap-2 rounded-md bg-cobble/30 px-2 py-2"
+                    >
+                      <span className="min-w-0 flex-1">
+                        {item.product.name}{" "}
+                        <span className="text-muted-foreground">
+                          ({formatEuro(item.unit_min_cents)}–
+                          {formatEuro(item.unit_max_cents)})
+                        </span>
+                      </span>
+                      {item.actual_unit_cents != null ? (
+                        <span className="tabular-nums">
+                          Actual {formatEuro(item.actual_unit_cents)}
+                        </span>
+                      ) : (
+                        <form
+                          className="flex items-center gap-2"
+                          onSubmit={(e) => {
+                            e.preventDefault();
+                            const fd = new FormData(e.currentTarget);
+                            handleActual(
+                              item.id,
+                              String(fd.get("actual") ?? "")
+                            );
+                          }}
+                        >
+                          <input
+                            name="actual"
+                            type="text"
+                            inputMode="decimal"
+                            placeholder="€ actual"
+                            className="h-9 w-24 rounded-md border border-cobble bg-paper px-2 text-sm"
+                            defaultValue=""
+                          />
+                          <Button type="submit" size="sm" variant="outline">
+                            Set
+                          </Button>
+                        </form>
+                      )}
+                    </li>
+                  );
+                })}
+              </ul>
               <div className="mt-2 flex flex-wrap gap-2">
                 {STATUS_STEPS.map((status) => (
                   <Button
@@ -217,5 +288,6 @@ export default function PickerPage() {
         </TabsContent>
       </Tabs>
     </div>
+    </PickerGate>
   );
 }

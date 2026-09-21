@@ -14,7 +14,7 @@ export default function CourierLayout({
   children: React.ReactNode;
 }) {
   return (
-    <div className="fixed inset-0 z-50 overflow-y-auto bg-canvas">
+    <div className="fixed inset-0 z-50 overflow-y-auto bg-paper">
       {children}
     </div>
   );

@@ -66,12 +66,12 @@ export function MarketClock({ cutoffIso, closeIso, fallback }: MarketClockProps)
 
   return (
     <>
-      <p className="max-w-[46ch] text-sm leading-relaxed text-ink/70">
+      <p className="text-lede max-w-[46ch] text-ink/70">
         {ready ? note(now, cutoff, close) : DEFAULT_NOTE}
       </p>
       <div className="pt-4">
         <span
-          className="price-sign text-[1.6rem] leading-tight"
+          className="price-sign text-2xl leading-tight"
           aria-live="polite"
           suppressHydrationWarning
         >

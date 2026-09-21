@@ -12,6 +12,7 @@ import {
   substitutionLabel,
 } from "@/lib/courier";
 import { HandlingPills } from "./HandlingPills";
+import { Camera, Lock, Navigation, Phone } from "lucide-react";
 
 interface RouteSheetProps {
   stop: DeliveryStop;
@@ -112,13 +113,13 @@ export function RouteSheet({
 
         <div className="mt-2.5 flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="text-[11px] font-semibold tracking-wide text-ink-faint uppercase">
+            <p className="text-[11px] text-ink-faint">
               {clusterTitle} crate
             </p>
-            <h2 className="text-xl leading-tight font-bold">{headline}</h2>
+            <h2 className="display-md">{headline}</h2>
             <p className="mt-0.5 text-sm text-ink-soft">{subline}</p>
           </div>
-          <span className="shrink-0 -rotate-2 rounded-xs bg-price-yellow px-2 py-1 font-price text-sm leading-none whitespace-nowrap">
+          <span className="price-sign shrink-0 text-sm leading-none whitespace-nowrap">
             {stop.packageNumber}
           </span>
         </div>
@@ -144,7 +145,7 @@ export function RouteSheet({
             aria-label={`Call ${stop.customerName}`}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-paper text-base ring-1 ring-cobble active:scale-95"
           >
-            📞
+            <Phone aria-hidden className="size-4.5" />
           </a>
           <a
             href={bicycleNavigationUrl(stop)}
@@ -153,7 +154,7 @@ export function RouteSheet({
             aria-label="Open turn by turn navigation"
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-paper text-base ring-1 ring-cobble active:scale-95"
           >
-            🚲
+            <Navigation aria-hidden className="size-4.5" />
           </a>
         </div>
 
@@ -245,13 +246,14 @@ export function RouteSheet({
             onClick={onConfirmDrop}
             className="mt-3 min-h-14 w-full rounded-xl bg-awning text-base font-bold text-white active:scale-[0.99]"
           >
-            📸 Confirm the drop
+            <Camera aria-hidden className="mr-2 inline size-5 align-text-bottom" />
+            Confirm the drop
           </button>
         )}
 
         {dropsAfterThis > 0 && (
           <p className="mt-2 flex items-center justify-center gap-1.5 text-[11px] text-ink-faint">
-            <span aria-hidden>🔒</span>
+            <Lock aria-hidden className="size-3.5 shrink-0" />
             {dropsAfterThis === 1
               ? "1 more drop in the crate, revealed once this one is confirmed"
               : `${dropsAfterThis} more drops in the crate, revealed one at a time`}

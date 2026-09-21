@@ -1,14 +1,15 @@
 "use client";
 
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import { usePathname } from "next/navigation";
 import { useCart } from "@/lib/cart";
+import { isComingSoon } from "@/lib/pricing";
 import { CartBar } from "@/components/shared/CartBar";
 import { cn } from "@/lib/utils";
 import type { Product } from "@/lib/types";
 
 function showsCartBar(pathname: string): boolean {
-  if (pathname === "/" || pathname === "/map") return true;
+  if (pathname === "/") return true;
   if (pathname === "/stalls" || pathname.startsWith("/stalls/")) return true;
   return false;
 }
@@ -27,10 +28,20 @@ export function LayoutCartBar({
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
-  const { count } = useCart();
+  const { count, items, remove } = useCart();
   const today = useMemo(() => new Date(todayIso), [todayIso]);
   const onRoute = showsCartBar(pathname);
   const barOpen = onRoute && count > 0;
+
+  useEffect(() => {
+    if (products.length === 0) return;
+    for (const item of items) {
+      const product = products.find((p) => p.id === item.productId);
+      if (!product || isComingSoon(product, today)) {
+        remove(item.productId);
+      }
+    }
+  }, [items, products, today, remove]);
 
   return (
     <>

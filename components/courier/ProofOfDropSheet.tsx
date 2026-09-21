@@ -1,7 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Image from "next/image";
 import type { DeliveryStop, ProofOfDrop } from "@/lib/courier-types";
+import { Camera, X } from "lucide-react";
 
 type GpsStatus = "locating" | "found" | "unavailable";
 
@@ -68,7 +70,7 @@ export function ProofOfDropSheet({
       <div className="animate-sheet-up relative w-full max-w-160 rounded-t-sheet bg-paper pb-[env(safe-area-inset-bottom)]">
         <div className="flex items-start justify-between gap-3 border-b border-cobble px-4 py-3.5">
           <div className="min-w-0">
-            <h2 className="text-lg leading-tight font-bold">Proof of drop</h2>
+            <h2 className="display-sm">Proof of drop</h2>
             <p className="truncate text-xs text-ink-soft">
               {stop.packageNumber} · {stop.address.split(",")[0]}
             </p>
@@ -79,31 +81,32 @@ export function ProofOfDropSheet({
             aria-label="Close"
             className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-canvas text-ink-soft"
           >
-            ✕
+            <X aria-hidden className="size-4.5" />
           </button>
         </div>
 
         <div className="max-h-[68dvh] overflow-y-auto px-4 py-4">
           {photo ? (
-            <div className="relative overflow-hidden rounded-xl bg-black">
-              <img
+            <div className="relative h-56 overflow-hidden rounded-md bg-ink">
+              <Image
                 src={photo}
                 alt="The package on the doorstep"
-                className="max-h-56 w-full object-cover"
+                fill
+                unoptimized
+                sizes="(max-width: 640px) 100vw, 640px"
+                className="object-cover"
               />
               <button
                 type="button"
                 onClick={() => setPhoto(null)}
-                className="absolute top-2 right-2 rounded-full bg-black/65 px-3 py-1.5 text-xs font-semibold text-white"
+                className="absolute top-2 right-2 rounded-md bg-ink/65 px-3 py-1.5 text-xs font-semibold text-paper"
               >
                 Retake
               </button>
             </div>
           ) : (
             <label className="flex min-h-40 cursor-pointer flex-col items-center justify-center gap-1.5 rounded-xl border-2 border-dashed border-cobble bg-canvas px-4 text-center active:scale-[0.99]">
-              <span className="text-3xl" aria-hidden>
-                📷
-              </span>
+              <Camera aria-hidden className="size-8 text-awning" />
               <span className="text-sm font-bold text-awning">
                 Photograph the doorstep
               </span>

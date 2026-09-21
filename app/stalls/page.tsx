@@ -1,10 +1,8 @@
 import { getProducts, getStalls } from "@/lib/data";
-import { CartBar } from "@/components/shared/CartBar";
 import { StallsBrowser } from "@/components/stalls/StallsBrowser";
 import type { StallListItem } from "@/components/stalls/StallRow";
 
 export default async function StallsPage() {
-  const today = new Date();
   const [stalls, products] = await Promise.all([getStalls(), getProducts()]);
 
   const counts = new Map<string, number>();
@@ -18,11 +16,12 @@ export default async function StallsPage() {
     itemCount: counts.get(stall.id) ?? 0,
   }));
 
+  // Readable list column — same width as cart/profile (page-narrow).
   return (
-    <>
+    <div className="page-narrow pb-4">
       <div className="px-4 pt-8">
         <h1 className="display-lg">Partner stalls</h1>
-        <p className="max-w-[56ch] pt-3 text-[0.9375rem] leading-relaxed text-ink/70">
+        <p className="text-lede max-w-[56ch] pt-3 text-ink/70">
           Fixed prices from stalls we shop first. Fish on Boschstraat, flowers
           at Mosae Forum, everything else around the Stadhuis. Open Friday
           09:00 to 15:00.
@@ -30,7 +29,6 @@ export default async function StallsPage() {
       </div>
 
       <StallsBrowser stalls={items} />
-      <CartBar products={products} today={today} />
-    </>
+    </div>
   );
 }

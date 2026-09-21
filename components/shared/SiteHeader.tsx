@@ -7,7 +7,6 @@ import { cn } from "@/lib/utils";
 const LINKS = [
   { href: "/", label: "Market" },
   { href: "/stalls", label: "Stalls" },
-  { href: "/map", label: "Map" },
   { href: "/profile", label: "Profile" },
 ];
 
@@ -16,15 +15,15 @@ export function SiteHeader() {
 
   return (
     <header className="sticky top-0 z-40 bg-paper">
-      <div className="mx-auto flex w-full max-w-[1200px] items-baseline justify-between gap-3 px-4 pt-3 pb-2.5">
+      <div className="page-wide flex items-end justify-between gap-3 px-4 pt-3 pb-2 sm:gap-6 sm:pt-4 sm:pb-2.5">
         <Link
           href="/"
-          className="display-md shrink-0 text-awning"
+          className="display-lg inline-flex min-h-11 shrink-0 items-end text-awning"
           aria-label="Merret, home"
         >
           Merret
         </Link>
-        <nav className="flex min-w-0 flex-wrap items-baseline justify-end gap-x-4 gap-y-1 text-sm">
+        <nav className="flex min-w-0 flex-nowrap items-end justify-end gap-x-3 sm:gap-x-6 text-lede">
           {LINKS.map((link) => {
             const active =
               link.href === "/"
@@ -36,7 +35,7 @@ export function SiteHeader() {
                 href={link.href}
                 aria-current={active ? "page" : undefined}
                 className={cn(
-                  "-mb-0.5 border-b-2 pb-0.5 transition-colors",
+                  "-mb-0.5 inline-flex min-h-11 shrink-0 items-end border-b-2 pb-1 transition-colors",
                   active
                     ? "border-awning font-medium text-awning"
                     : "border-transparent text-ink/65 hover:text-awning"

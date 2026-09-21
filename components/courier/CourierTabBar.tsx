@@ -1,13 +1,14 @@
 "use client";
 
 import React from "react";
+import { Map, ShoppingBasket, Wallet, type LucideIcon } from "lucide-react";
 
 export type CourierTab = "hub" | "route" | "earnings";
 
-const TABS: Array<{ id: CourierTab; label: string; icon: string }> = [
-  { id: "hub", label: "Markt hub", icon: "🧺" },
-  { id: "route", label: "My route", icon: "🗺️" },
-  { id: "earnings", label: "Shift", icon: "💶" },
+const TABS: Array<{ id: CourierTab; label: string; Icon: LucideIcon }> = [
+  { id: "hub", label: "Markt hub", Icon: ShoppingBasket },
+  { id: "route", label: "My route", Icon: Map },
+  { id: "earnings", label: "Shift", Icon: Wallet },
 ];
 
 export function CourierTabBar({
@@ -36,8 +37,8 @@ export function CourierTabBar({
                 isActive ? "text-awning" : "text-ink-faint"
               }`}
             >
-              <span className="relative text-lg leading-none" aria-hidden>
-                {tab.icon}
+              <span className="relative leading-none" aria-hidden>
+                <tab.Icon className="size-5" strokeWidth={isActive ? 2.4 : 1.8} />
                 {badge ? (
                   <span className="absolute -top-1.5 -right-2.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-maastricht-red px-1 text-[10px] font-bold text-white">
                     {badge}

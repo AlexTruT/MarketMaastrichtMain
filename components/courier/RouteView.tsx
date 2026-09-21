@@ -7,6 +7,7 @@ import { formatEuro, SHIFT_RATES } from "@/lib/courier";
 import { RouteMap } from "./RouteMap";
 import { RouteSheet } from "./RouteSheet";
 import { ProofOfDropSheet } from "./ProofOfDropSheet";
+import { Bike, CircleCheckBig } from "lucide-react";
 
 export function RouteView({ onGoToHub }: { onGoToHub: () => void }) {
   const {
@@ -32,10 +33,12 @@ export function RouteView({ onGoToHub }: { onGoToHub: () => void }) {
 
     return (
       <div className="flex h-full flex-col items-center justify-center px-6 text-center">
-        <span className="text-5xl" aria-hidden>
-          {finished ? "🎉" : "🚲"}
-        </span>
-        <h2 className="mt-4 text-xl font-bold">
+        {finished ? (
+          <CircleCheckBig aria-hidden className="size-12 text-awning" />
+        ) : (
+          <Bike aria-hidden className="size-12 text-ink-faint" />
+        )}
+        <h2 className="display-md mt-4">
           {finished ? "Route finished" : "No crate in your bag yet"}
         </h2>
         <p className="mt-1.5 max-w-70 text-sm text-ink-soft">

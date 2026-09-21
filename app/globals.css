@@ -181,8 +181,22 @@
 
 /* ---------------------------------------------------------------------------
    Typography system. Instrument Serif carries every heading; Instrument Sans
-   carries the interface. Permanent Marker is reserved for price signs and is
-   never used for a heading — the marker is the market's voice, not ours.
+   carries the interface. Permanent Marker is reserved for price signs (and
+   the hero countdown) and is never used for a heading.
+
+   Scale — keep related UI on the same rung; avoid one-off rem sizes:
+     display-xl  hero title only
+     display-lg  page h1
+     display-md  section h2 / site wordmark
+     display-sm  card / product titles
+     text-lede   15px  supporting copy under titles
+     text-sm     14px  nav, chips (≥44px), buttons, list primary lines
+     text-meta   13px  labels, eyebrows, units, secondary lines
+     text-xs     12px  captions, deal notes, fine print
+   Widths: page-wide (1200) browse/map/stall detail; page-narrow (640)
+   stalls list, cart, order, profile.
+   Spacing: page headers pt-8 + lede pt-3; major sections gap-10;
+   product shelf gap-x-4 gap-y-8; card caption stack gap-0.5 after pt-4.
    --------------------------------------------------------------------------- */
 
 @layer base {
@@ -212,15 +226,38 @@
 @utility display-md {
   font-family: var(--font-display), Georgia, serif;
   font-size: 1.4375rem;
-  line-height: 1.1;
+  line-height: 1.15;
   letter-spacing: -0.02em;
 }
 
 @utility display-sm {
   font-family: var(--font-display), Georgia, serif;
   font-size: 1.125rem;
-  line-height: 1.2;
+  line-height: 1.25;
   letter-spacing: -0.01em;
+}
+
+@utility text-lede {
+  font-size: 0.9375rem;
+  line-height: 1.55;
+}
+
+@utility text-meta {
+  font-size: 0.8125rem;
+  line-height: 1.45;
+}
+
+/* Browse shell (header + market grid). Forms stay on page-narrow. */
+@utility page-wide {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 75rem;
+}
+
+@utility page-narrow {
+  margin-inline: auto;
+  width: 100%;
+  max-width: 40rem;
 }
 
 /* A price written by hand on a card and propped in the crate. The only thing

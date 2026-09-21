@@ -63,3 +63,37 @@ export const getOrder = cache(
     return data;
   }
 );
+
+/** Digits only, strip leading NL country code / trunk 0 for loose matching. */
+export function phoneDigits(phone: string): string {
+  let digits = phone.replace(/\D/g, "");
+  if (digits.startsWith("31") && digits.length >= 11) digits = digits.slice(2);
+  if (digits.startsWith("0")) digits = digits.slice(1);
+  return digits;
+}
+
+/**
+ * Lightweight buyer lookup for /profile after the phone OTP session is set.
+ * Matches on digit-normalised phone so "06 1234 5601" and "0612345601" both work.
+ */
+export const getOrdersByPhone = cache(
+  async (
+    phone: string
+  ): Promise<(Order & { order_items: OrderItemWithProduct[] })[]> => {
+    const needle = phoneDigits(phone);
+    if (needle.length < 8) return [];
+
+    const { data, error } = await supabase
+      .from("orders")
+      .select("*, order_items(*, product:products(*))")
+      .order("created_at", { ascending: false })
+      .limit(80);
+    if (error) throw error;
+
+    // Exact match on normalised digits (NL trunk 0 / +31 stripped the same way
+    // as buyer session phones). Avoids loose endsWith collisions.
+    return (data ?? [])
+      .filter((order) => phoneDigits(order.phone) === needle)
+      .slice(0, 8);
+  }
+);

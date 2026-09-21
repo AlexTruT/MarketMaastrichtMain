@@ -8,6 +8,7 @@ import { CourierTabBar, type CourierTab } from "./CourierTabBar";
 import { HubView } from "./HubView";
 import { RouteView } from "./RouteView";
 import { EarningsView } from "./EarningsView";
+import { Bell } from "lucide-react";
 
 function CourierShell({ profile }: { profile: CourierProfile }) {
   const { ready, batches, myStops, deliveredStops, incomingAlert, dismissAlert } =
@@ -23,7 +24,7 @@ function CourierShell({ profile }: { profile: CourierProfile }) {
   const poolCount = batches.reduce((sum, batch) => sum + batch.stops.length, 0);
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-canvas">
+    <div className="flex h-dvh flex-col overflow-hidden bg-paper">
       <CourierTopBar
         profile={profile}
         dropsDone={deliveredStops.length}
@@ -36,7 +37,8 @@ function CourierShell({ profile }: { profile: CourierProfile }) {
           onClick={dismissAlert}
           className="animate-drop-in z-30 shrink-0 bg-price-yellow px-4 py-2.5 text-left text-xs font-semibold"
         >
-          🔔 {incomingAlert}
+          <Bell aria-hidden className="mr-1.5 inline size-4 align-text-bottom" />
+          {incomingAlert}
         </button>
       )}
 
@@ -54,7 +56,7 @@ function CourierShell({ profile }: { profile: CourierProfile }) {
         ) : tab === "route" ? (
           <RouteView onGoToHub={() => setTab("hub")} />
         ) : (
-          <EarningsView />
+          <EarningsView profile={profile} />
         )}
       </main>
 

@@ -1,8 +1,14 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { getOrder } from "@/lib/data";
-import { buttonVariants } from "@/components/ui/button";
-import { formatEuro, formatRange } from "@/lib/pricing";
+import { canViewOrder } from "@/lib/order-access";
+import {
+  customerTotals,
+  formatEuro,
+  markupCents,
+  midpoint,
+} from "@/lib/pricing";
+import { Produce } from "@/components/shared/Produce";
 
 export default async function OrderConfirmationPage({
   params,
@@ -16,72 +22,166 @@ export default async function OrderConfirmationPage({
   const order = await getOrder(orderId);
   if (!order) notFound();
 
-  const totalMin = order.subtotal_min_cents + order.fee_cents;
-  const totalMax = order.subtotal_max_cents + order.fee_cents;
+  const allowed = await canViewOrder(order);
+  if (!allowed) {
+    return (
+      <div className="page-narrow flex flex-1 flex-col px-4 pt-8 pb-12">
+        <h1 className="display-lg max-w-[16ch]">Sign in to view this order</h1>
+        <p className="max-w-[48ch] pt-3 text-lede text-ink/70">
+          Order details are only shown on the device that placed them, or after
+          you confirm the phone number from your pickup ticket.
+        </p>
+        <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+          <Link
+            href="/profile"
+            className="inline-flex h-12 items-center justify-center rounded-md bg-awning px-6 text-sm font-medium text-paper transition-colors hover:bg-awning/90 focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none"
+          >
+            Verify your phone
+          </Link>
+          <Link
+            href="/"
+            className="inline-flex h-12 items-center justify-center rounded-md ring-1 ring-cobble px-6 text-sm font-medium transition-colors hover:bg-cobble/40 focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none"
+          >
+            Back to the market
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  const { subtotalMin, subtotalMax, fee } = customerTotals(order);
+  // Stored order keeps real min/max; confirmation shows midpoints.
+  const displaySubtotal = midpoint(subtotalMin, subtotalMax);
+  const displayMarkup = markupCents(displaySubtotal);
+  const displayTotal = displaySubtotal + displayMarkup + fee;
+  // A bare "1" on a yellow card reads as a stray mark, not a label. Crates
+  // on the hub bench are numbered with the same padding.
+  const crateLabel = `#${String(order.id).padStart(3, "0")}`;
+
+  // A real sequence, so it is numbered. Friday morning, in order.
+  const steps = [
+    {
+      time: "09:00",
+      text: "Our shopper walks the Markt with every list of the day.",
+    },
+    {
+      time: "11:30",
+      text: `Your crate is packed at the Merret stand and labelled ${crateLabel}.`,
+    },
+    {
+      time: order.time_window.split(" to ")[0],
+      text:
+        order.fulfilment === "home"
+          ? `A courier picks up the crate at the Merret stand and rides it to ${order.address}.`
+          : "It is waiting for you at the Merret stand on the Markt.",
+    },
+  ];
 
   return (
-    <div className="flex flex-1 flex-col gap-6 p-4">
-      <section className="flex flex-col gap-1">
-        <h1 className="text-2xl font-bold">Order placed</h1>
-        <p className="text-muted-foreground">
-          Order #{order.id} · {order.time_window}
-        </p>
-        <p className="text-muted-foreground">
-          {order.fulfilment === "home"
-            ? `Delivered to ${order.address}`
-            : `Pickup at ${order.pickup_point}`}
-        </p>
-      </section>
-
-      <section className="flex flex-col gap-2">
-        <h2 className="text-lg font-bold">Items</h2>
-        <ul className="flex flex-col divide-y divide-cobble border-y border-cobble">
-          {order.order_items.map((item) => (
-            <li key={item.id} className="flex items-center gap-3 py-3">
-              <span className="text-2xl">{item.product.emoji}</span>
-              <div className="min-w-0 flex-1">
-                <p className="truncate font-medium leading-tight">
-                  {item.product.name}
-                </p>
-                <p className="text-sm text-muted-foreground">
-                  {item.qty} × {item.product.unit}
-                </p>
-              </div>
-              <span className="text-sm">
-                {formatRange(
-                  item.unit_min_cents * item.qty,
-                  item.unit_max_cents * item.qty
-                )}
-              </span>
-            </li>
-          ))}
-        </ul>
-      </section>
-
-      <section className="flex flex-col gap-1 border-t border-cobble pt-4 text-sm">
-        <div className="flex items-center justify-between">
-          <span>Subtotal</span>
-          <span>
-            {formatRange(order.subtotal_min_cents, order.subtotal_max_cents)}
-          </span>
-        </div>
-        <div className="flex items-center justify-between">
-          <span>Fee</span>
-          <span>{formatEuro(order.fee_cents)}</span>
-        </div>
-        <div className="flex items-center justify-between text-lg font-bold">
-          <span>Total</span>
-          <span>{formatRange(totalMin, totalMax)}</span>
-        </div>
-      </section>
-
-      <p className="rounded-md border border-cobble bg-cobble/20 p-3 text-sm">
-        Our shopper buys your order Friday morning.
+    <div className="page-narrow flex flex-1 flex-col px-4 pt-8 pb-12">
+      <h1 className="display-lg max-w-[16ch]">Order placed</h1>
+      <p className="max-w-[48ch] pt-3 text-lede text-ink/70">
+        Our shopper buys your order Friday morning. Your crate carries this
+        number from the stall to{" "}
+        {order.fulfilment === "home" ? order.address : order.pickup_point}.
       </p>
 
-      <Link href="/" className={buttonVariants({ size: "lg" })}>
-        Back to the market
-      </Link>
+      <span className="price-sign mt-7 self-start text-[1.75rem] leading-tight tracking-wide">
+        {crateLabel}
+      </span>
+
+      <ol className="mt-11">
+        {steps.map((step, i) => (
+          <li key={step.time} className="flex gap-4">
+            <div className="flex flex-col items-center">
+              <span className="grid size-7 shrink-0 place-items-center rounded-full bg-awning text-xs font-semibold text-paper tabular-nums">
+                {i + 1}
+              </span>
+              {i < steps.length - 1 && (
+                <span aria-hidden className="w-px flex-1 bg-cobble" />
+              )}
+            </div>
+            <div className="pb-7">
+              <p className="text-sm tabular-nums">{step.time}</p>
+              <p className="max-w-[44ch] pt-0.5 text-lede text-ink/70">
+                {step.text}
+              </p>
+            </div>
+          </li>
+        ))}
+      </ol>
+
+      <h2 className="display-md pt-2">What you asked for</h2>
+      <ul className="pt-4">
+        {order.order_items.map((item) => (
+          <li
+            key={item.id}
+            className="flex items-center gap-3.5 border-b border-cobble py-3 first:border-t"
+          >
+            <span className="relative size-10 shrink-0 overflow-hidden rounded-sm bg-paper ring-1 ring-cobble/50">
+              <Produce
+                name={item.product.name}
+                category={item.product.category}
+              />
+            </span>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm">{item.product.name}</p>
+              <p className="text-xs text-ink/55">
+                {item.qty} × {item.product.unit}
+              </p>
+            </div>
+            <span className="shrink-0 text-sm tabular-nums">
+              {formatEuro(
+                midpoint(
+                  item.unit_min_cents * item.qty,
+                  item.unit_max_cents * item.qty
+                )
+              )}
+            </span>
+          </li>
+        ))}
+      </ul>
+
+      <dl className="flex flex-col gap-2 pt-5 text-sm">
+        <div className="flex items-baseline justify-between">
+          <dt className="text-ink/60">Groceries</dt>
+          <dd className="tabular-nums">{formatEuro(displaySubtotal)}</dd>
+        </div>
+        <div className="flex items-baseline justify-between">
+          <dt className="text-ink/60">Online markup 15%</dt>
+          <dd className="tabular-nums">{formatEuro(displayMarkup)}</dd>
+        </div>
+        <div className="flex items-baseline justify-between">
+          <dt className="text-ink/60">
+            {order.fulfilment === "home" ? "Delivery" : "Pickup"}
+          </dt>
+          <dd className="tabular-nums">
+            {fee === 0 ? "Free" : formatEuro(fee)}
+          </dd>
+        </div>
+      </dl>
+
+      <div className="mt-5 flex items-center justify-between gap-4 border-t border-cobble pt-6">
+        <p className="display-md">Total</p>
+        <span className="price-sign text-[1.75rem] leading-tight">
+          {formatEuro(displayTotal)}
+        </span>
+      </div>
+
+      <div className="mt-9 flex flex-col gap-3 sm:flex-row">
+        <Link
+          href={`/profile?phone=${encodeURIComponent(order.phone)}`}
+          className="inline-flex h-12 items-center justify-center rounded-md bg-awning px-6 text-sm font-medium text-paper transition-colors hover:bg-awning/90 focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none"
+        >
+          Open your profile
+        </Link>
+        <Link
+          href="/"
+          className="inline-flex h-12 items-center justify-center rounded-md ring-1 ring-cobble px-6 text-sm font-medium transition-colors hover:bg-cobble/40 focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none"
+        >
+          Back to the market
+        </Link>
+      </div>
     </div>
   );
 }

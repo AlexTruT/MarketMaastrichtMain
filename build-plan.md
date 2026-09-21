@@ -109,7 +109,7 @@ Two phones. Phone 1 is the customer, phone 2 shows `/picker`, mirrored to the sc
 1. Phone 1, home: "Friday market, order before 10." Point at the pumpkin deal and the Hokkaido coming-soon card.
 2. Tap Hof van Sjef: the story. "Every partner stall has one of these."
 3. Add butternut pumpkin (deal), smoked mackerel, a vlaai slice, and onions (price range). "Onions are from the rest of the market. Our shopper picks the best stall that day."
-4. Cart, pickup at Randwyck campus, substitution "call me", place order.
+4. Cart, pickup at Merret stand on the Markt, substitution "call me", place order.
 5. Switch to phone 2: the order appears within 5 seconds. Shopping list now says "4 × Smoked mackerel" because it merged with other orders. "One walk through the market serves everyone."
 6. Tick mackerel. Open Orders tab, mark an order ready.
 

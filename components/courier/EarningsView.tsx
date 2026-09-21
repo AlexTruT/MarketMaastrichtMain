@@ -1,8 +1,13 @@
 "use client";
 
 import React from "react";
+import Image from "next/image";
+import type { CourierProfile } from "@/lib/courier-types";
 import { useCourierStore } from "@/lib/courier-store";
+import { CLUSTER_META } from "@/lib/courier-mock-data";
 import { calculateShiftPayout, formatEuro, SHIFT_RATES } from "@/lib/courier";
+import { Package } from "lucide-react";
+import { CourierAvatar } from "./CourierProfileCard";
 
 function timeOf(iso?: string) {
   if (!iso) return "–";
@@ -13,18 +18,33 @@ function timeOf(iso?: string) {
   });
 }
 
-export function EarningsView() {
+export function EarningsView({ profile }: { profile: CourierProfile }) {
   const { deliveredStops, hoursWorked, resetShift } = useCourierStore();
   const payout = calculateShiftPayout(hoursWorked, deliveredStops.length);
+  const cluster = CLUSTER_META[profile.preferredCluster];
 
   return (
     <div className="flex flex-col gap-4 px-4 pt-4">
-      <section className="rounded-2xl bg-paper p-4 ring-1 ring-cobble">
+      <section className="rounded-md bg-paper p-4 ring-1 ring-cobble">
+        <div className="flex items-center gap-3.5">
+          <CourierAvatar profile={profile} size="lg" />
+          <div className="min-w-0">
+            <p className="text-[0.8125rem] text-awning">Courier profile</p>
+            <h2 className="display-sm pt-0.5">{profile.name}</h2>
+            <p className="truncate text-xs text-ink-soft">
+              {profile.role} · {profile.vehicle}
+            </p>
+            <p className="truncate text-xs text-ink-faint">
+              Prefers {cluster.shortTitle}
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className="rounded-md bg-paper p-4 ring-1 ring-cobble">
         <div className="flex items-end justify-between gap-3">
           <div>
-            <p className="text-[11px] font-semibold tracking-wide text-ink-faint uppercase">
-              Earned this shift
-            </p>
+            <p className="display-sm">Earned this shift</p>
             <p className="mt-1 text-sm text-ink-soft">
               {hoursWorked}h on the bike ·{" "}
               {deliveredStops.length === 1
@@ -32,7 +52,7 @@ export function EarningsView() {
                 : `${deliveredStops.length} drops`}
             </p>
           </div>
-          <span className="-rotate-2 rounded-xs bg-price-yellow px-3 py-1.5 font-price text-2xl leading-none">
+          <span className="price-sign text-2xl leading-none">
             {formatEuro(payout.totalCents)}
           </span>
         </div>
@@ -42,19 +62,19 @@ export function EarningsView() {
             <dt className="text-ink-soft">
               Hourly guarantee, {formatEuro(SHIFT_RATES.baseHourlyCents)}/h
             </dt>
-            <dd className="font-semibold">{formatEuro(payout.basePayCents)}</dd>
+            <dd className="font-medium">{formatEuro(payout.basePayCents)}</dd>
           </div>
           <div className="flex justify-between gap-3 py-2.5">
             <dt className="text-ink-soft">
               Drop bonus, {formatEuro(SHIFT_RATES.dropBonusCents)} each
             </dt>
-            <dd className="font-semibold">{formatEuro(payout.bonusPayCents)}</dd>
+            <dd className="font-medium">{formatEuro(payout.bonusPayCents)}</dd>
           </div>
         </dl>
       </section>
 
-      <section className="overflow-hidden rounded-2xl bg-paper ring-1 ring-cobble">
-        <h2 className="border-b border-cobble px-4 py-3 text-sm font-bold">
+      <section className="overflow-hidden rounded-md bg-paper ring-1 ring-cobble">
+        <h2 className="display-sm border-b border-cobble px-4 py-3">
           Delivered with proof
         </h2>
 
@@ -67,14 +87,19 @@ export function EarningsView() {
             {deliveredStops.map((stop) => (
               <li key={stop.id} className="flex items-center gap-3 px-4 py-3">
                 {stop.proof?.photoDataUrl ? (
-                  <img
-                    src={stop.proof.photoDataUrl}
-                    alt={`Doorstep at ${stop.address}`}
-                    className="h-12 w-12 shrink-0 rounded-lg object-cover"
-                  />
+                  <span className="relative h-12 w-12 shrink-0 overflow-hidden rounded-md">
+                    <Image
+                      src={stop.proof.photoDataUrl}
+                      alt={`Doorstep at ${stop.address}`}
+                      fill
+                      unoptimized
+                      sizes="48px"
+                      className="object-cover"
+                    />
+                  </span>
                 ) : (
-                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-lg bg-canvas text-lg">
-                    📦
+                  <span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-md bg-canvas">
+                    <Package aria-hidden className="size-5 text-ink-faint" />
                   </span>
                 )}
 

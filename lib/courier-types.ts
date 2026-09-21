@@ -1,8 +1,8 @@
 /**
  * Courier domain types for Merret.
  *
- * Everything here is UI state only: the courier app runs entirely on mock data
- * in the browser until Supabase is wired up (see supabase-courier.sql).
+ * UI state for the courier app. Stops may be mock demo data or live
+ * home-delivery orders loaded from Supabase (see lib/courier-live.ts).
  */
 
 /** [latitude, longitude], the order Leaflet expects. */
@@ -31,6 +31,7 @@ export interface CourierProfile {
   firstName: string;
   role: string;
   vehicle: string;
+  /** Public path to portrait photo, e.g. `/couriers/alex.jpg`. */
   avatar: string;
   preferredCluster: DeliveryCluster;
 }
@@ -105,6 +106,10 @@ export interface DeliveryStop {
   legFromPrevious: LatLng[];
 
   status: StopStatus;
+  /** Live DB order vs local mock demo stop. */
+  source?: "live" | "demo";
+  /** Present when source is live — used to write order status back. */
+  liveOrderId?: number;
   /** Courier profile id that claimed this stop, undefined while in the pool. */
   assignedTo?: string;
   claimedAt?: string;

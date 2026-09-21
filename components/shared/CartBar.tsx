@@ -3,7 +3,13 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
-import { formatRange, lineTotals } from "@/lib/pricing";
+import {
+  formatEuro,
+  isComingSoon,
+  lineTotals,
+  markupCents,
+  midpoint,
+} from "@/lib/pricing";
 import type { Product } from "@/lib/types";
 
 type CartBarProps = {
@@ -28,21 +34,24 @@ export function CartBar({ products, today }: CartBarProps) {
 
   if (count === 0) return null;
 
-  let min = 0;
-  let max = 0;
+  let subtotalMin = 0;
+  let subtotalMax = 0;
   for (const item of items) {
     const product = products.find((p) => p.id === item.productId);
-    if (!product) continue;
+    if (!product || isComingSoon(product, today)) continue;
     const line = lineTotals(product, item.qty, today);
-    min += line.min;
-    max += line.max;
+    subtotalMin += line.min;
+    subtotalMax += line.max;
   }
+  // Sticky bar shows groceries + online markup (delivery chosen at checkout).
+  const groceries = midpoint(subtotalMin, subtotalMax);
+  const barTotal = groceries + markupCents(groceries);
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
+    <div className="pointer-events-none fixed inset-x-0 bottom-0 z-30 bg-paper px-4 pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)]">
       <Link
         href="/cart"
-        className="pointer-events-auto mx-auto flex h-14 w-full max-w-[1200px] items-center justify-between gap-3 rounded-md bg-awning px-5 text-paper shadow-[0_-2px_12px_rgba(22,22,22,0.08)] transition-transform active:translate-y-px"
+        className="pointer-events-auto page-wide flex h-14 items-center justify-between gap-3 rounded-md bg-awning px-5 text-paper shadow-[0_-2px_12px_rgba(22,22,22,0.08)] transition-transform active:translate-y-px"
       >
         <span className="flex min-w-0 items-center gap-2.5">
           <span
@@ -50,10 +59,10 @@ export function CartBar({ products, today }: CartBarProps) {
           >
             {count}
           </span>
-          <span className="truncate text-[0.9375rem] font-medium">View cart</span>
+          <span className="truncate text-sm font-medium">View cart</span>
         </span>
-        <span className="shrink-0 text-[0.9375rem] font-semibold tabular-nums">
-          {formatRange(min, max)}
+        <span className="shrink-0 text-sm font-semibold tabular-nums">
+          {formatEuro(barTotal)}
         </span>
       </Link>
     </div>

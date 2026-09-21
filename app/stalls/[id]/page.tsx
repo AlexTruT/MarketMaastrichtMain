@@ -1,10 +1,9 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getProducts, getProductsByStall, getStall } from "@/lib/data";
+import { getProductsByStall, getStall } from "@/lib/data";
 import { stallScene } from "@/lib/stall-scenes";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { ProductShelf } from "@/components/shared/ProductShelf";
-import { CartBar } from "@/components/shared/CartBar";
 import { SellerProfileHeader } from "@/components/stalls/SellerProfileHeader";
 
 export default async function StallPage({
@@ -14,10 +13,9 @@ export default async function StallPage({
 }) {
   const { id } = await params;
   const today = new Date();
-  const [stall, stallProducts, allProducts] = await Promise.all([
+  const [stall, stallProducts] = await Promise.all([
     getStall(id),
     getProductsByStall(id),
-    getProducts(),
   ]);
 
   if (!stall) notFound();
@@ -26,8 +24,8 @@ export default async function StallPage({
 
   return (
     <>
-      {/* Full-bleed market scene — same breakout pattern as the home hero. */}
-      <div className="relative h-[min(58vw,20rem)] w-screen max-w-[100vw] ml-[calc(50%-50vw)] overflow-hidden bg-cobble">
+      {/* Full-bleed market scene — outer layout has no max-width. */}
+      <div className="relative h-[min(58vw,20rem)] w-full overflow-hidden bg-cobble">
         <Image
           src={scene.src}
           alt={scene.alt}
@@ -40,16 +38,16 @@ export default async function StallPage({
         />
       </div>
 
-      <div className="flex flex-col px-4 pt-6 pb-4">
+      <div className="page-wide flex flex-col px-4 pt-6 pb-4">
         <SellerProfileHeader stall={stall} />
 
         <section className="pt-10">
           <h2 className="display-md">On the table this Friday</h2>
-          <p className="max-w-[48ch] pt-2 text-sm leading-relaxed text-ink/65">
+          <p className="text-lede max-w-[48ch] pt-2 text-ink/65">
             Fixed prices from {stall.owner}. You pay what the card says.
           </p>
           {stallProducts.length === 0 ? (
-            <p className="pt-4 text-sm text-ink/55">
+            <p className="text-meta pt-4 text-ink/55">
               Nothing listed from this stall yet. Our shopper will still walk
               past it on Friday.
             </p>
@@ -68,7 +66,6 @@ export default async function StallPage({
           )}
         </section>
       </div>
-      <CartBar products={allProducts} today={today} />
     </>
   );
 }

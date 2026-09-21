@@ -8,6 +8,7 @@ import { CartProvider } from "@/lib/cart";
 import { getProducts } from "@/lib/data";
 import { Toaster } from "@/components/ui/sonner";
 import { SiteHeader } from "@/components/shared/SiteHeader";
+import { SiteFooter } from "@/components/shared/SiteFooter";
 import { LayoutCartBar } from "@/components/shared/LayoutCartBar";
 import "./globals.css";
 
@@ -55,6 +56,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
               {children}
             </LayoutCartBar>
           </main>
+          <SiteFooter />
           <Toaster />
         </CartProvider>
       </body>

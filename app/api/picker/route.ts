@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { requirePickerAccess } from "@/lib/picker-auth";
 import { supabase } from "@/lib/supabase";
 import type { PickerOrder } from "@/lib/types";
 
@@ -7,6 +8,11 @@ import type { PickerOrder } from "@/lib/types";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
+  const gate = await requirePickerAccess();
+  if (gate) {
+    return NextResponse.json({ error: gate.error }, { status: 401 });
+  }
+
   const { data, error } = await supabase
     .from("orders")
     .select(
