@@ -37,9 +37,17 @@ export const metadata: Metadata = {
     "Order fresh from the Maastricht Friday market. Our shopper walks the market for you and couriers deliver it or drop it at a pickup point.",
 };
 
+// Live market catalogue — never bake Supabase into the static build.
+export const dynamic = "force-dynamic";
+
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const today = new Date();
-  const products = await getProducts();
+  let products: Awaited<ReturnType<typeof getProducts>> = [];
+  try {
+    products = await getProducts();
+  } catch (err) {
+    console.error("[layout] getProducts failed", err);
+  }
 
   return (
     <html

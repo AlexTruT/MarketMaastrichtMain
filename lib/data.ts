@@ -10,21 +10,32 @@ import type { Order, OrderItemWithProduct, Product, Stall } from "./types";
 // exactly as fresh as before, just without redundant round-trips.
 
 export const getProducts = cache(async (): Promise<Product[]> => {
-  const { data, error } = await supabase
-    .from("products")
-    .select("*")
-    .order("sort", { ascending: true });
-  if (error) throw error;
-  return data ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("products")
+      .select("*")
+      .order("sort", { ascending: true });
+    if (error) throw error;
+    return data ?? [];
+  } catch (err) {
+    // Build / offline: don't take down every page that reads the catalogue.
+    console.error("[getProducts]", err);
+    return [];
+  }
 });
 
 export const getStalls = cache(async (): Promise<Stall[]> => {
-  const { data, error } = await supabase
-    .from("stalls")
-    .select("*")
-    .order("name", { ascending: true });
-  if (error) throw error;
-  return data ?? [];
+  try {
+    const { data, error } = await supabase
+      .from("stalls")
+      .select("*")
+      .order("name", { ascending: true });
+    if (error) throw error;
+    return data ?? [];
+  } catch (err) {
+    console.error("[getStalls]", err);
+    return [];
+  }
 });
 
 export const getStall = cache(async (id: string): Promise<Stall | null> => {
