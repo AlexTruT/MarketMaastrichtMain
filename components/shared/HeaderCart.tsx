@@ -57,17 +57,17 @@ export function HeaderCart({ products, todayIso }: HeaderCartProps) {
   return (
     <Sheet>
       <SheetTrigger
-        className="hidden min-h-11 items-center gap-1 rounded-md px-2.5 text-sm text-ink/65 transition-colors hover:text-awning focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none sm:text-lede lg:inline-flex"
+        className="hidden min-h-11 items-center gap-2 rounded-md px-2.5 text-sm text-ink/65 transition-colors hover:text-awning focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none sm:text-lede lg:inline-flex"
         aria-label={
           count === 0
             ? "Open bag"
             : `Open bag, ${count} ${count === 1 ? "item" : "items"}, ${formatEuro(subtotalWithMarkup)}`
         }
       >
-        <span className="relative inline-flex shrink-0">
+        <span className="relative inline-flex size-5 shrink-0 items-center justify-center">
           <ShoppingBag className="size-4" strokeWidth={1.75} aria-hidden />
           {count > 0 ? (
-            <span className="absolute -top-1.5 -right-1.5 grid min-w-4.5 place-items-center rounded-full bg-awning px-1 text-[0.65rem] font-semibold leading-none text-paper tabular-nums">
+            <span className="absolute -top-1.5 -right-1 grid min-w-4.5 place-items-center rounded-full bg-awning px-1 text-[0.65rem] font-semibold leading-none text-paper tabular-nums">
               {count}
             </span>
           ) : null}

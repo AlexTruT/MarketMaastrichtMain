@@ -130,7 +130,7 @@ export function LanguageToggle() {
         aria-controls={listId}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "inline-flex min-h-11 items-end gap-0.5 px-1.5 font-medium text-awning transition-colors duration-150 ease-out",
+          "inline-flex min-h-11 items-end gap-0.5 px-2 font-medium text-awning transition-colors duration-150 ease-out",
           "hover:text-awning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-awning"
         )}
       >

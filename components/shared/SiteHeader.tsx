@@ -33,7 +33,7 @@ export function SiteHeader({
         >
           Merret
         </Link>
-        <div className="flex min-w-0 items-end gap-1 sm:gap-2">
+        <div className="flex min-w-0 items-end gap-2 sm:gap-3">
           <nav
             aria-label="Primary"
             className="flex min-w-0 flex-nowrap items-end justify-end gap-x-0.5 text-sm sm:gap-x-1 sm:text-lede"
