@@ -29,8 +29,8 @@ export function SiteHeader({
   const pathname = usePathname();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-cobble bg-paper">
-      <div className="page-wide flex items-end gap-3 pt-3 pb-2 sm:gap-6 sm:pt-4 sm:pb-2.5">
+    <header className="sticky top-0 z-40 overflow-visible border-b border-cobble bg-paper">
+      <div className="page-wide flex items-end gap-3 overflow-visible pt-3 pb-2 sm:gap-6 sm:pt-4 sm:pb-2.5">
         <Link
           href="/"
           className="display-lg inline-flex min-h-11 shrink-0 items-end text-awning"

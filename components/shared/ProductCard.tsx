@@ -99,7 +99,7 @@ export function ProductCard({
               className={
                 compact
                   ? "absolute top-1 right-1 grid size-9 place-items-center rounded-full bg-awning text-base leading-none text-paper shadow-sm transition-transform duration-150 ease-out hover:scale-105 active:scale-95"
-                  : "absolute top-1.5 right-1.5 grid size-11 place-items-center rounded-full bg-awning text-lg leading-none text-paper shadow-sm transition-transform duration-150 ease-out hover:scale-105 active:scale-95"
+                  : "absolute top-1.5 right-1.5 grid size-10 place-items-center rounded-full bg-awning text-lg leading-none text-paper shadow-sm transition-transform duration-150 ease-out hover:scale-105 active:scale-95"
               }
             >
               +

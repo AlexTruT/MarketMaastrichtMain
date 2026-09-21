@@ -7,7 +7,6 @@ import {
   formatEuro,
   isComingSoon,
   lineTotals,
-  markupCents,
   midpoint,
 } from "@/lib/pricing";
 import { Produce } from "@/components/shared/Produce";
@@ -53,30 +52,31 @@ export function HeaderCart({ products, todayIso }: HeaderCartProps) {
     subtotalMax += line.totals.max;
   }
   const groceries = midpoint(subtotalMin, subtotalMax);
-  const subtotalWithMarkup = groceries + markupCents(groceries);
+  // Match /cart "Groceries" line (stall prices only, no 15% markup or delivery).
+  const headerTotal = groceries;
   const hasRange = subtotalMin !== subtotalMax;
 
   return (
     <Sheet>
       <SheetTrigger
-        className="hidden min-h-11 items-end gap-2.5 rounded-md px-2 pb-1 text-sm text-ink/65 transition-colors hover:text-awning focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none sm:text-lede lg:inline-flex"
+        className="hidden min-h-11 items-end gap-2.5 overflow-visible rounded-md px-2 pb-1 text-sm text-ink/65 transition-colors hover:text-awning focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none sm:text-lede lg:inline-flex"
         aria-label={
           shownCount === 0
             ? "Open bag"
-            : `Open bag, ${shownCount} ${shownCount === 1 ? "item" : "items"}, ${formatEuro(subtotalWithMarkup)}`
+            : `Open bag, ${shownCount} ${shownCount === 1 ? "item" : "items"}, ${formatEuro(headerTotal)}`
         }
       >
-        <span className="relative mb-0.5 inline-flex size-5 shrink-0 items-center justify-center">
+        <span className="relative mb-0.5 inline-flex size-5 shrink-0 items-center justify-center overflow-visible">
           <ShoppingBag className="size-4" strokeWidth={1.75} aria-hidden />
           {shownCount > 0 ? (
-            <span className="absolute -top-1.5 -right-1.5 grid min-w-4.5 place-items-center rounded-full bg-awning px-1 text-[0.65rem] font-semibold leading-none text-paper tabular-nums">
+            <span className="absolute -top-2 -right-2 z-10 grid min-h-4.5 min-w-4.5 place-items-center rounded-full bg-awning px-1 text-[0.65rem] font-semibold leading-none text-paper tabular-nums ring-2 ring-paper">
               {shownCount}
             </span>
           ) : null}
         </span>
         {shownCount > 0 ? (
           <span className="tabular-nums font-medium text-ink">
-            {formatEuro(subtotalWithMarkup)}
+            {formatEuro(headerTotal)}
           </span>
         ) : (
           <span>Bag</span>
@@ -141,14 +141,10 @@ export function HeaderCart({ products, todayIso }: HeaderCartProps) {
           {lines.length > 0 ? (
             <div className="flex items-baseline justify-between text-sm">
               <span className="text-ink/60">
-                {hasRange ? "Up to" : "Subtotal"}
+                {hasRange ? "Groceries up to" : "Groceries"}
               </span>
               <span className="font-medium tabular-nums">
-                {formatEuro(
-                  hasRange
-                    ? subtotalMax + markupCents(subtotalMax)
-                    : subtotalWithMarkup
-                )}
+                {formatEuro(hasRange ? subtotalMax : groceries)}
               </span>
             </div>
           ) : null}

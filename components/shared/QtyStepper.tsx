@@ -12,7 +12,8 @@ type QtyStepperProps = {
 };
 
 /**
- * Plus/minus for a bag line. 44px hits, qty 0 means remove, 99 is the cap.
+ * Plus/minus for a bag line. Paper tone keeps 44px hits in cart rows.
+ * Awning tone matches the 40px product "+" so it covers no more of the photo.
  */
 export function QtyStepper({
   name,
@@ -26,8 +27,10 @@ export function QtyStepper({
   return (
     <div
       className={cn(
-        "flex items-center rounded-full p-0.5",
-        awning ? "bg-awning text-paper" : "bg-cobble/55 text-ink"
+        "flex items-center rounded-full",
+        awning
+          ? "h-10 bg-awning p-0.5 text-paper"
+          : "bg-cobble/55 p-0.5 text-ink"
       )}
     >
       <button
@@ -35,15 +38,20 @@ export function QtyStepper({
         aria-label={`Remove one ${name}`}
         onClick={() => onChange(qty - 1)}
         className={cn(
-          "grid size-11 place-items-center rounded-full text-lg leading-none transition-[transform,background-color] duration-150 ease-out active:scale-95",
-          awning ? "hover:bg-white/15" : "hover:bg-paper"
+          "grid place-items-center rounded-full leading-none transition-[transform,background-color] duration-150 ease-out active:scale-95",
+          awning
+            ? "size-9 text-base hover:bg-white/15"
+            : "size-11 text-lg hover:bg-paper"
         )}
       >
         −
       </button>
       <span
         aria-live="polite"
-        className="min-w-6 text-center text-sm font-semibold tabular-nums"
+        className={cn(
+          "text-center font-semibold tabular-nums",
+          awning ? "min-w-5 text-xs" : "min-w-6 text-sm"
+        )}
       >
         {qty}
       </span>
@@ -55,8 +63,10 @@ export function QtyStepper({
         disabled={atMax}
         onClick={() => onChange(qty + 1)}
         className={cn(
-          "grid size-11 place-items-center rounded-full text-lg leading-none transition-[transform,background-color,opacity] duration-150 ease-out active:scale-95 disabled:opacity-40",
-          awning ? "hover:bg-white/15" : "hover:bg-paper"
+          "grid place-items-center rounded-full leading-none transition-[transform,background-color,opacity] duration-150 ease-out active:scale-95 disabled:opacity-40",
+          awning
+            ? "size-9 text-base hover:bg-white/15"
+            : "size-11 text-lg hover:bg-paper"
         )}
       >
         +

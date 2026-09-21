@@ -10,7 +10,7 @@ import {
 import { ProductGrid } from "@/components/home/ProductGrid";
 import { MarketHighlights } from "@/components/home/MarketHighlights";
 import { MarketClock } from "@/components/home/MarketClock";
-import { clockLabel, clockNote } from "@/lib/market-clock";
+import { clockLabel } from "@/lib/market-clock";
 import marketPhoto from "@/assets/vrijdagmarkt-groentekraam-maastricht-eighty8things_3475807105.webp";
 
 function formatMarketDate(date: Date): string {
@@ -32,7 +32,7 @@ export default async function HomePage() {
 
   const deals = products.filter((p) => isDealActive(p, today));
   const comingSoon = products.filter((p) => isComingSoon(p, today));
-  const ctaHref = deals.length > 0 ? "#deals" : "#market";
+  const marketDateLine = `Next market: ${formatMarketDate(nextFriday)}, 09:00 to 15:00`;
 
   const heroCopy = (
     <>
@@ -45,18 +45,15 @@ export default async function HomePage() {
           cutoffIso={cutoff.toISOString()}
           closeIso={close.toISOString()}
           initialLabel={clockLabel(today, cutoff, close)}
-          initialNote={clockNote(today, cutoff, close)}
+          marketDateLine={marketDateLine}
         />
       </div>
-      <p className="text-meta pt-3 text-ink/55">
-        Next market {formatMarketDate(nextFriday)}, 09:00 to 15:00.
-      </p>
-      <p className="text-meta max-w-[46ch] pt-2 text-ink/55">
-        Pickup free · Delivery €4.50 · Same Friday afternoon
+      <p className="text-meta max-w-[46ch] pt-3 text-ink/55">
+        Order before Friday 10:00 · Pickup free · Delivery €4.50
       </p>
       <div className="pt-5">
         <Link
-          href={ctaHref}
+          href="#market"
           className="inline-flex h-12 items-center rounded-md bg-awning px-5 text-sm font-medium text-paper transition-transform duration-150 ease-out hover:bg-awning/90 focus-visible:ring-2 focus-visible:ring-awning focus-visible:ring-offset-2 focus-visible:ring-offset-paper focus-visible:outline-none active:scale-[0.99]"
         >
           Browse this week&apos;s market
@@ -82,12 +79,11 @@ export default async function HomePage() {
           />
         </div>
 
-        <div className="page-wide pt-5 lg:grid lg:grid-cols-12 lg:items-center lg:gap-10 lg:pt-10 lg:pb-2">
-          {/* Same left edge as section headings; max 560px under lg. */}
+        {/* Desktop: ~48px under header; mobile padding unchanged. */}
+        <div className="page-wide pt-5 lg:grid lg:grid-cols-12 lg:items-start lg:gap-10 lg:pt-12 lg:pb-2">
           <div className="w-full max-w-[560px] text-left lg:col-span-5 lg:max-w-none">
             {heroCopy}
           </div>
-          {/* No priority here — avoids a second preload; mobile LCP owns priority. */}
           <div className="relative col-span-7 hidden aspect-4/3 overflow-hidden rounded-[16px] lg:block">
             <Image
               src={marketPhoto}
@@ -102,7 +98,8 @@ export default async function HomePage() {
         </div>
       </section>
 
-      <div className="page-wide flex flex-col gap-12 pt-9 pb-6">
+      {/* Desktop: 96px under hero; mobile gap unchanged. */}
+      <div className="page-wide flex flex-col gap-12 pt-9 pb-6 lg:pt-24">
         <MarketHighlights
           deals={deals}
           comingSoon={comingSoon}
@@ -113,7 +110,7 @@ export default async function HomePage() {
         <section id="market" className="scroll-mt-24 border-t border-cobble pt-10">
           <h2 className="display-lg">The whole market</h2>
           <p className="text-meta max-w-[46ch] pt-1.5 text-ink/55">
-            Everything our shopper can pick this Friday — filter by stall corner.
+            Everything our shopper can pick this Friday. Filter by stall corner.
           </p>
           <ProductGrid
             products={products}
