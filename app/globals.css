@@ -1,0 +1,81 @@
+@import "tailwindcss";
+
+@theme {
+  --color-paper: #ffffff;
+  --color-canvas: #f5f3ee;
+  --color-ink: #161616;
+  --color-ink-soft: #5a5a55;
+  --color-ink-faint: #8d8d86;
+  --color-awning: #1e5b3f;
+  --color-awning-dark: #16442f;
+  --color-awning-tint: #e8f1eb;
+  --color-price: #f7e84b;
+  --color-maastricht: #c8102e;
+  --color-cobble: #e6e3dc;
+
+  --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-marker: var(--font-permanent-marker), "Comic Sans MS", cursive;
+
+  --radius-sheet: 28px;
+
+  --animate-sheet-up: sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-drop-in: drop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(14%);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes drop-in {
+  from {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+  /* The courier holds the phone one-handed: never bounce the layout. */
+  overscroll-behavior-y: none;
+}
+
+/* Tap targets should not flash blue on Android. */
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* The Google Maps embed paints its own white background while it loads. */
+iframe {
+  color-scheme: light;
+}
