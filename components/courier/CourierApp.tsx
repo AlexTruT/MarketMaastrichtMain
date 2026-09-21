@@ -13,11 +13,12 @@ function CourierShell({ profile }: { profile: CourierProfile }) {
   const { ready, batches, myStops, deliveredStops, incomingAlert, dismissAlert } =
     useCourierStore();
   const [tab, setTab] = useState<CourierTab>("hub");
+  const hasRoute = myStops.length > 0;
 
   // Land on the map as soon as there is something to ride.
   useEffect(() => {
-    if (myStops.length > 0) setTab("route");
-  }, [myStops.length > 0]);
+    if (hasRoute) setTab("route");
+  }, [hasRoute]);
 
   const poolCount = batches.reduce((sum, batch) => sum + batch.stops.length, 0);
 
@@ -33,7 +34,7 @@ function CourierShell({ profile }: { profile: CourierProfile }) {
         <button
           type="button"
           onClick={dismissAlert}
-          className="animate-drop-in z-30 shrink-0 bg-price px-4 py-2.5 text-left text-xs font-semibold"
+          className="animate-drop-in z-30 shrink-0 bg-price-yellow px-4 py-2.5 text-left text-xs font-semibold"
         >
           🔔 {incomingAlert}
         </button>

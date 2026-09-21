@@ -118,7 +118,7 @@ export function RouteSheet({
             <h2 className="text-xl leading-tight font-bold">{headline}</h2>
             <p className="mt-0.5 text-sm text-ink-soft">{subline}</p>
           </div>
-          <span className="shrink-0 -rotate-2 rounded-xs bg-price px-2 py-1 font-marker text-sm leading-none whitespace-nowrap">
+          <span className="shrink-0 -rotate-2 rounded-xs bg-price-yellow px-2 py-1 font-price text-sm leading-none whitespace-nowrap">
             {stop.packageNumber}
           </span>
         </div>
@@ -166,7 +166,7 @@ export function RouteSheet({
         {expanded && (
           <div className="animate-fade-in mt-3 flex flex-col gap-3">
             {stop.deliveryNotes && (
-              <p className="rounded-xl border-l-4 border-price bg-price/15 px-3 py-2.5 text-xs leading-relaxed">
+              <p className="rounded-xl border-l-4 border-price-yellow bg-price-yellow/15 px-3 py-2.5 text-xs leading-relaxed">
                 <span className="block font-bold">From the customer</span>
                 {stop.deliveryNotes}
               </p>

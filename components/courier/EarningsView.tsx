@@ -32,7 +32,7 @@ export function EarningsView() {
                 : `${deliveredStops.length} drops`}
             </p>
           </div>
-          <span className="-rotate-2 rounded-xs bg-price px-3 py-1.5 font-marker text-2xl leading-none">
+          <span className="-rotate-2 rounded-xs bg-price-yellow px-3 py-1.5 font-price text-2xl leading-none">
             {formatEuro(payout.totalCents)}
           </span>
         </div>

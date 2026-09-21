@@ -100,6 +100,50 @@
   --sidebar-ring: var(--awning-green);
 }
 
+/* Courier app only, see /courier. Additive: nothing above is redefined. */
+@theme {
+  --color-canvas: #f5f3ee;
+  --color-ink-soft: #5a5a55;
+  --color-ink-faint: #8d8d86;
+  --color-awning-tint: #e8f1eb;
+  --radius-sheet: 28px;
+
+  --animate-sheet-up: sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1);
+  --animate-fade-in: fade-in 0.2s ease-out;
+  --animate-drop-in: drop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+@keyframes sheet-up {
+  from {
+    transform: translateY(14%);
+    opacity: 0.4;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes drop-in {
+  from {
+    transform: translateY(-120%);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;

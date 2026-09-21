@@ -126,7 +126,7 @@ export function ProofOfDropSheet({
                 gps === "found"
                   ? "bg-awning"
                   : gps === "locating"
-                    ? "animate-pulse bg-price"
+                    ? "animate-pulse bg-price-yellow"
                     : "bg-ink-faint"
               }`}
               aria-hidden

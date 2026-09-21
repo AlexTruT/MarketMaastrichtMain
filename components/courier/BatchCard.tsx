@@ -36,7 +36,7 @@ export function BatchCard({
             {batch.description}
           </p>
         </div>
-        <span className="shrink-0 -rotate-2 rounded-xs bg-price px-2.5 py-1 font-marker text-lg leading-none">
+        <span className="shrink-0 -rotate-2 rounded-xs bg-price-yellow px-2.5 py-1 font-price text-lg leading-none">
           {formatEuro(batch.payoutCents)}
         </span>
       </div>

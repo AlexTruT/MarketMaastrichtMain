@@ -7,7 +7,7 @@ import type {
   ShiftPayout,
   SubstitutionPreference,
 } from "./courier-types";
-import { CLUSTER_META, MARKT_HUB } from "./courier-mock-data";
+import { CLUSTER_META } from "./courier-mock-data";
 
 /** Average cargo e-bike speed through the Maastricht centre. */
 const BIKE_KMH = 15;
