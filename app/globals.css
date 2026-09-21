@@ -1,81 +1,113 @@
 @import "tailwindcss";
+@import "tw-animate-css";
+@import "shadcn/tailwind.css";
 
-@theme {
-  --color-paper: #ffffff;
-  --color-canvas: #f5f3ee;
-  --color-ink: #161616;
-  --color-ink-soft: #5a5a55;
-  --color-ink-faint: #8d8d86;
-  --color-awning: #1e5b3f;
-  --color-awning-dark: #16442f;
-  --color-awning-tint: #e8f1eb;
-  --color-price: #f7e84b;
-  --color-maastricht: #c8102e;
-  --color-cobble: #e6e3dc;
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-geist-mono);
+  --font-heading: var(--font-sans);
+  --font-price: var(--font-price);
 
-  --font-sans: var(--font-instrument-sans), ui-sans-serif, system-ui, sans-serif;
-  --font-marker: var(--font-permanent-marker), "Comic Sans MS", cursive;
+  /* Merret design tokens, see context.md "Design" */
+  --color-paper: var(--paper);
+  --color-ink: var(--ink);
+  --color-awning: var(--awning-green);
+  --color-price-yellow: var(--price-yellow);
+  --color-maastricht-red: var(--maastricht-red);
+  --color-cobble: var(--cobble-grey);
 
-  --radius-sheet: 28px;
-
-  --animate-sheet-up: sheet-up 0.32s cubic-bezier(0.22, 1, 0.36, 1);
-  --animate-fade-in: fade-in 0.2s ease-out;
-  --animate-drop-in: drop-in 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  --color-sidebar-ring: var(--sidebar-ring);
+  --color-sidebar-border: var(--sidebar-border);
+  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
+  --color-sidebar-accent: var(--sidebar-accent);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
+  --color-sidebar-primary: var(--sidebar-primary);
+  --color-sidebar-foreground: var(--sidebar-foreground);
+  --color-sidebar: var(--sidebar);
+  --color-chart-5: var(--chart-5);
+  --color-chart-4: var(--chart-4);
+  --color-chart-3: var(--chart-3);
+  --color-chart-2: var(--chart-2);
+  --color-chart-1: var(--chart-1);
+  --color-ring: var(--ring);
+  --color-input: var(--input);
+  --color-border: var(--border);
+  --color-destructive: var(--destructive);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent: var(--accent);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-muted: var(--muted);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-secondary: var(--secondary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-primary: var(--primary);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-popover: var(--popover);
+  --color-card-foreground: var(--card-foreground);
+  --color-card: var(--card);
+  --radius-sm: calc(var(--radius) * 0.6);
+  --radius-md: calc(var(--radius) * 0.8);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) * 1.4);
+  --radius-2xl: calc(var(--radius) * 1.8);
+  --radius-3xl: calc(var(--radius) * 2.2);
+  --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-price: 2px;
 }
 
-@keyframes sheet-up {
-  from {
-    transform: translateY(14%);
-    opacity: 0.4;
+:root {
+  /* Merret palette, see context.md "Design" */
+  --paper: #ffffff;
+  --ink: #161616;
+  --awning-green: #1e5b3f;
+  --price-yellow: #f7e84b;
+  --maastricht-red: #c8102e;
+  --cobble-grey: #e6e3dc;
+
+  --background: var(--paper);
+  --foreground: var(--ink);
+  --card: var(--paper);
+  --card-foreground: var(--ink);
+  --popover: var(--paper);
+  --popover-foreground: var(--ink);
+  --primary: var(--awning-green);
+  --primary-foreground: var(--paper);
+  --secondary: var(--cobble-grey);
+  --secondary-foreground: var(--ink);
+  --muted: var(--cobble-grey);
+  --muted-foreground: #5a5a5a;
+  --accent: var(--cobble-grey);
+  --accent-foreground: var(--ink);
+  --destructive: var(--maastricht-red);
+  --border: var(--cobble-grey);
+  --input: var(--cobble-grey);
+  --ring: var(--awning-green);
+  --chart-1: var(--awning-green);
+  --chart-2: var(--price-yellow);
+  --chart-3: var(--maastricht-red);
+  --chart-4: var(--cobble-grey);
+  --chart-5: var(--ink);
+  --radius: 6px;
+  --sidebar: var(--paper);
+  --sidebar-foreground: var(--ink);
+  --sidebar-primary: var(--awning-green);
+  --sidebar-primary-foreground: var(--paper);
+  --sidebar-accent: var(--cobble-grey);
+  --sidebar-accent-foreground: var(--ink);
+  --sidebar-border: var(--cobble-grey);
+  --sidebar-ring: var(--awning-green);
+}
+
+@layer base {
+  * {
+    @apply border-border outline-ring/50;
   }
-  to {
-    transform: translateY(0);
-    opacity: 1;
+  body {
+    @apply bg-background text-foreground;
   }
-}
-
-@keyframes fade-in {
-  from {
-    opacity: 0;
+  html {
+    @apply font-sans;
   }
-  to {
-    opacity: 1;
-  }
-}
-
-@keyframes drop-in {
-  from {
-    transform: translateY(-120%);
-    opacity: 0;
-  }
-  to {
-    transform: translateY(0);
-    opacity: 1;
-  }
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background-color: var(--color-canvas);
-  color: var(--color-ink);
-  font-family: var(--font-sans);
-  -webkit-font-smoothing: antialiased;
-  /* The courier holds the phone one-handed: never bounce the layout. */
-  overscroll-behavior-y: none;
-}
-
-/* Tap targets should not flash blue on Android. */
-button,
-a {
-  -webkit-tap-highlight-color: transparent;
-}
-
-/* The Google Maps embed paints its own white background while it loads. */
-iframe {
-  color-scheme: light;
 }
