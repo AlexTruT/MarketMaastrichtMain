@@ -121,7 +121,7 @@ export function LanguageToggle() {
   const label = lang === "nl" ? "NL" : "EN";
 
   return (
-    <div ref={rootRef} className="relative shrink-0 pb-1 text-sm">
+    <div ref={rootRef} className="relative shrink-0 text-sm sm:text-lede">
       <button
         type="button"
         aria-label="Language"
@@ -130,14 +130,15 @@ export function LanguageToggle() {
         aria-controls={listId}
         onClick={() => setOpen((v) => !v)}
         className={cn(
-          "inline-flex min-h-11 items-end gap-0.5 px-2 font-medium text-awning transition-colors duration-150 ease-out",
-          "hover:text-awning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-awning"
+          "inline-flex min-h-11 items-end gap-0.5 px-2 pb-1 font-normal text-ink/65 transition-colors duration-150 ease-out",
+          "hover:text-awning focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-awning",
+          open && "text-awning"
         )}
       >
         <span>{label}</span>
         <ChevronDown
           className={cn(
-            "mb-0.5 size-3.5 shrink-0 text-ink/50 transition-transform duration-150",
+            "mb-0.5 size-3.5 shrink-0 text-ink/45 transition-transform duration-150",
             open && "rotate-180"
           )}
           strokeWidth={2}

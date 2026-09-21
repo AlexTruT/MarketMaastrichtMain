@@ -33,8 +33,10 @@ type HeaderCartProps = {
  * Mobile keeps the sticky bottom CartBar.
  */
 export function HeaderCart({ products, todayIso }: HeaderCartProps) {
-  const { items, count, setQty, remove } = useCart();
+  const { items, count, setQty, remove, ready } = useCart();
   const today = new Date(todayIso);
+  // Match SSR until localStorage cart is ready — no Bag → € flash on reload.
+  const shownCount = ready ? count : 0;
 
   const lines = items
     .map((item) => {
@@ -57,22 +59,22 @@ export function HeaderCart({ products, todayIso }: HeaderCartProps) {
   return (
     <Sheet>
       <SheetTrigger
-        className="hidden min-h-11 items-center gap-2 rounded-md px-2.5 text-sm text-ink/65 transition-colors hover:text-awning focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none sm:text-lede lg:inline-flex"
+        className="hidden min-h-11 items-end gap-2.5 rounded-md px-2 pb-1 text-sm text-ink/65 transition-colors hover:text-awning focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none sm:text-lede lg:inline-flex"
         aria-label={
-          count === 0
+          shownCount === 0
             ? "Open bag"
-            : `Open bag, ${count} ${count === 1 ? "item" : "items"}, ${formatEuro(subtotalWithMarkup)}`
+            : `Open bag, ${shownCount} ${shownCount === 1 ? "item" : "items"}, ${formatEuro(subtotalWithMarkup)}`
         }
       >
-        <span className="relative inline-flex size-5 shrink-0 items-center justify-center">
+        <span className="relative mb-0.5 inline-flex size-5 shrink-0 items-center justify-center">
           <ShoppingBag className="size-4" strokeWidth={1.75} aria-hidden />
-          {count > 0 ? (
-            <span className="absolute -top-1.5 -right-1 grid min-w-4.5 place-items-center rounded-full bg-awning px-1 text-[0.65rem] font-semibold leading-none text-paper tabular-nums">
-              {count}
+          {shownCount > 0 ? (
+            <span className="absolute -top-1.5 -right-1.5 grid min-w-4.5 place-items-center rounded-full bg-awning px-1 text-[0.65rem] font-semibold leading-none text-paper tabular-nums">
+              {shownCount}
             </span>
           ) : null}
         </span>
-        {count > 0 ? (
+        {shownCount > 0 ? (
           <span className="tabular-nums font-medium text-ink">
             {formatEuro(subtotalWithMarkup)}
           </span>
@@ -85,7 +87,7 @@ export function HeaderCart({ products, todayIso }: HeaderCartProps) {
         <SheetHeader className="border-b border-cobble">
           <SheetTitle>Your bag</SheetTitle>
           <SheetDescription>
-            {count === 0
+            {!ready || count === 0
               ? "Nothing in it yet."
               : `${count} ${count === 1 ? "item" : "items"}`}
           </SheetDescription>
