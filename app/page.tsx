@@ -79,8 +79,8 @@ export default async function HomePage() {
           />
         </div>
 
-        {/* Desktop: ~48px under header; mobile padding unchanged. */}
-        <div className="page-wide pt-5 lg:grid lg:grid-cols-12 lg:items-start lg:gap-10 lg:pt-12 lg:pb-2">
+        {/* Desktop: 48px under header; copy vertically centres with the photo. */}
+        <div className="page-wide pt-5 lg:grid lg:grid-cols-12 lg:items-center lg:gap-10 lg:pt-12 lg:pb-2">
           <div className="w-full max-w-[560px] text-left lg:col-span-5 lg:max-w-none">
             {heroCopy}
           </div>
