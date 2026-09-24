@@ -17,8 +17,9 @@ import type {
 import {
   DEMO_STOPS,
   INCOMING_STOP_TEMPLATES,
+  MARKT_HUB,
 } from "./courier-mock-data";
-import { groupIntoBatches, pathLengthMeters, rideMinutes } from "./courier";
+import { groupIntoBatches, legMeters, rideMinutes } from "./courier";
 import {
   loadCourierReadyStops,
   setCourierOrderStatus,
@@ -396,21 +397,36 @@ export function CourierStoreProvider({
     }
   }, [progress, currentStop?.status, markArrived]);
 
+  const batches = useMemo(
+    () =>
+      groupIntoBatches(
+        stops.filter((stop) => !stop.assignedTo),
+        MARKT_HUB.coords,
+      ),
+    [stops],
+  );
+
   const claimBatch = useCallback(
     (cluster: DeliveryCluster) => {
       if (myStops.length > 0) return;
+      const batch = batches.find((candidate) => candidate.cluster === cluster);
+      if (!batch) return;
       const claimedAt = new Date().toISOString();
-      setStops((previous) =>
-        previous.map((stop) =>
-          stop.cluster === cluster &&
-          !stop.assignedTo &&
-          stop.status === "queued"
-            ? { ...stop, assignedTo: courierId, claimedAt }
-            : stop,
-        ),
+      // The planned stops carry the riding order and re-anchored legs, so the
+      // crate is ridden exactly as the hub card promised. They go to the end
+      // of the list, in order: myStops[0] is always the next door.
+      const planned = new Map(
+        batch.stops.map((stop) => [
+          stop.id,
+          { ...stop, assignedTo: courierId, claimedAt },
+        ]),
       );
+      setStops((previous) => [
+        ...previous.filter((stop) => !planned.has(stop.id)),
+        ...planned.values(),
+      ]);
     },
-    [courierId, myStops.length],
+    [batches, courierId, myStops.length],
   );
 
   const startRide = useCallback(() => {
@@ -491,16 +507,9 @@ export function CourierStoreProvider({
     void refreshLiveStops();
   }, [courierId, myStops, refreshLiveStops, syncLiveStatus]);
 
-  const batches = useMemo(
-    () => groupIntoBatches(stops.filter((stop) => !stop.assignedTo)),
-    [stops],
-  );
-
   const minutesToCurrentStop = useMemo(() => {
     if (!currentStop || currentStop.status === "arrived") return 0;
-    return rideMinutes(
-      pathLengthMeters(currentStop.legFromPrevious) * (1 - progress),
-    );
+    return rideMinutes(legMeters(currentStop.legFromPrevious) * (1 - progress));
   }, [currentStop, progress]);
 
   const hoursWorked = useMemo(() => {

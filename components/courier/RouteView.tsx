@@ -74,17 +74,21 @@ export function RouteView({ onGoToHub }: { onGoToHub: () => void }) {
     : MARKT_HUB.name;
 
   return (
-    <div className="relative h-full overflow-hidden">
-      <RouteMap
-        key={currentStop.id}
-        stop={currentStop}
-        originAddress={originAddress}
-        originLabel={originLabel}
-        bottomInset={Math.round(sheetHeight)}
-      />
+    <div className="relative h-full overflow-hidden lg:flex">
+      {/* Phone: the map fills the screen under a bottom sheet. Desktop: a
+          side panel on the left, the map beside it at full height. */}
+      <div className="absolute inset-0 lg:relative lg:order-2 lg:flex-1">
+        <RouteMap
+          key={currentStop.id}
+          stop={currentStop}
+          originAddress={originAddress}
+          originLabel={originLabel}
+          bottomInset={Math.round(sheetHeight)}
+        />
+      </div>
 
       {/* Stays below the proof-of-drop sheet, which sits at z-50. */}
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto max-w-160">
+      <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 mx-auto max-w-160 lg:pointer-events-auto lg:relative lg:order-1 lg:mx-0 lg:h-full lg:w-105 lg:max-w-none lg:shrink-0 lg:overflow-y-auto lg:border-r lg:border-cobble lg:bg-paper">
         <RouteSheet
           stop={currentStop}
           stopIndex={stopIndex}

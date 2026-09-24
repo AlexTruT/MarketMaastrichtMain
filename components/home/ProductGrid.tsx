@@ -53,7 +53,7 @@ export function ProductGrid({
       <div
         role="tablist"
         aria-label="Filter the market by category"
-        className="-mx-5 mt-6 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:-mx-8 sm:px-8 lg:sticky lg:top-[4.75rem] lg:z-30 lg:mx-0 lg:bg-paper lg:px-0 lg:py-2 [&::-webkit-scrollbar]:hidden"
+        className="-mx-5 mt-6 flex gap-2 overflow-x-auto px-5 pb-1 [scrollbar-width:none] sm:-mx-8 sm:px-8 lg:sticky lg:top-[4.375rem] lg:z-30 lg:mx-0 lg:bg-paper lg:px-0 lg:py-2 [&::-webkit-scrollbar]:hidden"
       >
         {available.map((c) => {
           const active = category === c.value;

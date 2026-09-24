@@ -1,7 +1,10 @@
+import { notFound } from "next/navigation";
 import { getProducts } from "@/lib/data";
 import { Produce } from "@/components/shared/Produce";
 
+/** Internal grid for eyeballing product art. Development only. */
 export default async function ArtCheck() {
+  if (process.env.NODE_ENV === "production") notFound();
   const products = await getProducts();
   return (
     <div className="grid grid-cols-3 gap-x-4 gap-y-6 p-4">

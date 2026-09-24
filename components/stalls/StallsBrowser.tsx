@@ -48,7 +48,7 @@ export function StallsBrowser({ stalls }: { stalls: StallListItem[] }) {
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search by stall, origin or zone…"
-            className="h-11 w-full rounded-md border border-cobble bg-paper pr-3 pl-10 text-sm text-ink placeholder:text-ink/40"
+            className="h-11 w-full rounded-md border border-cobble bg-paper pr-3 pl-10 text-base text-ink sm:text-sm placeholder:text-ink/40"
           />
         </label>
 

@@ -49,7 +49,11 @@ export function LayoutCartBar({
     <>
       <div
         className={cn(
-          "flex min-h-0 flex-1 flex-col",
+          // At least a viewport tall (minus the header), so the footer always
+          // starts below the fold. Otherwise it sits at the bottom of the
+          // screen during the loading skeleton and jumps when a long page
+          // streams in.
+          "flex min-h-[calc(100dvh-4.4375rem)] flex-1 flex-col",
           barOpen &&
             "pb-[calc(3.5rem+env(safe-area-inset-bottom)+1.5rem)] lg:pb-0"
         )}

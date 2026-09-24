@@ -24,7 +24,9 @@ function CourierShell({ profile }: { profile: CourierProfile }) {
   const poolCount = batches.reduce((sum, batch) => sum + batch.stops.length, 0);
 
   return (
-    <div className="flex h-dvh flex-col overflow-hidden bg-paper">
+    // App-like taps: no text selection from a stray double tap and no
+    // double-tap zoom delay. The address block opts back in to selection.
+    <div className="flex h-dvh touch-manipulation flex-col overflow-hidden bg-paper select-none">
       <CourierTopBar
         profile={profile}
         dropsDone={deliveredStops.length}

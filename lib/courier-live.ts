@@ -2,19 +2,14 @@ import "server-only";
 import { MARKT_HUB } from "./courier-mock-data";
 import {
   clusterForAddress,
+  coordsForAddress,
   inferHandlingTags,
 } from "./courier";
-import type { DeliveryStop, LatLng } from "./courier-types";
+import type { DeliveryStop } from "./courier-types";
 import { supabase } from "./supabase";
 import type { Order, OrderItemWithProduct } from "./types";
 
 type LiveOrder = Order & { order_items: OrderItemWithProduct[] };
-
-const CLUSTER_DEFAULT_COORDS: Record<string, LatLng> = {
-  centrum_wyck: [50.84905, 5.69895],
-  ceramique_randwyck: [50.84555, 5.70285],
-  brusselsepoort_belfort: [50.84695, 5.68505],
-};
 
 function areaLabelFromAddress(address: string): string {
   const street = address.split(",")[0]?.trim() || address;
@@ -25,7 +20,7 @@ function areaLabelFromAddress(address: string): string {
 export function orderToDeliveryStop(order: LiveOrder): DeliveryStop {
   const address = order.address?.trim() || MARKT_HUB.address;
   const cluster = clusterForAddress(address);
-  const coords = CLUSTER_DEFAULT_COORDS[cluster] ?? MARKT_HUB.coords;
+  const coords = coordsForAddress(address, cluster);
   const handling = Array.from(
     new Set(
       order.order_items.flatMap((item) =>

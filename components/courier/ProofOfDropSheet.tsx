@@ -223,7 +223,7 @@ export function ProofOfDropSheet({
               value={notes}
               onChange={(event) => setNotes(event.target.value)}
               placeholder="Left behind the planters, as you asked"
-              className="mt-1.5 min-h-12 w-full rounded-xl bg-canvas px-3 text-sm outline-none ring-1 ring-cobble focus:ring-2 focus:ring-awning"
+              className="mt-1.5 min-h-12 w-full rounded-xl bg-canvas px-3 text-base outline-none select-text ring-1 ring-cobble focus:ring-2 focus:ring-awning"
             />
           </label>
 
