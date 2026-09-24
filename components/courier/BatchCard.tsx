@@ -8,23 +8,30 @@ import {
   stopItemCount,
 } from "@/lib/courier";
 import { HandlingPills } from "./HandlingPills";
-import { Lock } from "lucide-react";
+import { Lock, Star } from "lucide-react";
 
 export function BatchCard({
   batch,
   onClaim,
   disabled,
+  isUsualRun = false,
 }: {
   batch: DeliveryBatch;
   onClaim: (cluster: DeliveryBatch["cluster"]) => void;
   disabled: boolean;
+  /** The courier's preferred neighbourhood, surfaced first in the hub. */
+  isUsualRun?: boolean;
 }) {
   const handling = Array.from(
     new Set(batch.stops.flatMap((stop) => stop.handling)),
   );
 
   return (
-    <article className="overflow-hidden rounded-2xl bg-paper ring-1 ring-cobble">
+    <article
+      className={`overflow-hidden rounded-2xl bg-paper ring-1 ${
+        isUsualRun ? "ring-2 ring-awning/60" : "ring-cobble"
+      }`}
+    >
       <div className="flex items-start gap-3 px-4 pt-4">
         <span
           className="mt-0.5 h-10 w-2 shrink-0 rounded-full"
@@ -32,14 +39,26 @@ export function BatchCard({
           aria-hidden
         />
         <div className="min-w-0 flex-1">
+          {isUsualRun && (
+            <p className="mb-1 inline-flex items-center gap-1 rounded-full bg-awning-tint px-2 py-0.5 text-[11px] font-semibold text-awning">
+              <Star aria-hidden className="size-3 fill-current" />
+              Your usual run
+            </p>
+          )}
           <h3 className="display-sm">{batch.title}</h3>
           <p className="mt-1 text-xs leading-relaxed text-ink-soft">
             {batch.description}
           </p>
+          <p className="mt-1 text-[11px] font-semibold text-ink-faint">
+            {batch.terrain}
+          </p>
         </div>
-        <span className="price-sign shrink-0 text-lg leading-none">
-          {formatEuro(batch.payoutCents)}
-        </span>
+        <div className="shrink-0 text-right">
+          <span className="price-sign text-lg leading-none">
+            +{formatEuro(batch.payoutCents)}
+          </span>
+          <p className="mt-1.5 text-[11px] text-ink-faint">drop bonus</p>
+        </div>
       </div>
 
       <dl className="mx-4 mt-4 grid grid-cols-3 divide-x divide-cobble rounded-xl bg-canvas py-2.5 text-center">
@@ -59,7 +78,7 @@ export function BatchCard({
         </div>
         <div className="px-1">
           <dt className="text-[11px] text-ink-faint">
-            Time
+            Est. time
           </dt>
           <dd className="text-sm font-semibold">{batch.etaMinutes} min</dd>
         </div>
@@ -84,7 +103,6 @@ export function BatchCard({
                 {stopItemCount(stop)}{" "}
                 {stopItemCount(stop) === 1 ? "item" : "items"} ·{" "}
                 {stop.deliveryWindow}
-                {stop.source === "live" ? " · live" : stop.source === "demo" ? " · demo" : ""}
               </p>
             </div>
             <span className="shrink-0 rounded-md bg-canvas px-1.5 py-0.5 text-[10px] font-semibold text-ink-soft">
@@ -106,9 +124,14 @@ export function BatchCard({
           disabled={disabled}
           className="flex min-h-13 w-full items-center justify-center gap-2 rounded-xl bg-awning text-sm font-bold text-white transition-transform active:scale-[0.99] disabled:bg-cobble disabled:text-ink-faint"
         >
-          {disabled
-            ? "Finish your current route first"
-            : `Take ${batch.stops.length} ${batch.stops.length === 1 ? "drop" : "drops"} and go`}
+          {disabled ? (
+            <>
+              <Lock aria-hidden className="size-4" />
+              Finish your current crate first
+            </>
+          ) : (
+            `Take ${batch.stops.length} ${batch.stops.length === 1 ? "drop" : "drops"} and go`
+          )}
         </button>
       </div>
     </article>

@@ -11,9 +11,10 @@ import { Bike, CircleCheckBig } from "lucide-react";
 
 export function RouteView({ onGoToHub }: { onGoToHub: () => void }) {
   const {
-    myStops,
     currentStop,
+    currentCrate,
     deliveredStops,
+    batches,
     progress,
     minutesToCurrentStop,
     startRide,
@@ -28,8 +29,9 @@ export function RouteView({ onGoToHub }: { onGoToHub: () => void }) {
     setSheetHeight(height);
   }, []);
 
-  if (!currentStop) {
+  if (!currentStop || !currentCrate) {
     const finished = deliveredStops.length > 0;
+    const cratesWaiting = batches.length;
 
     return (
       <div className="flex h-full flex-col items-center justify-center px-6 text-center">
@@ -39,11 +41,11 @@ export function RouteView({ onGoToHub }: { onGoToHub: () => void }) {
           <Bike aria-hidden className="size-12 text-ink-faint" />
         )}
         <h2 className="display-md mt-4">
-          {finished ? "Route finished" : "No crate in your bag yet"}
+          {finished ? "Crate empty, nice riding" : "No crate in your bag yet"}
         </h2>
-        <p className="mt-1.5 max-w-70 text-sm text-ink-soft">
+        <p className="mt-1.5 max-w-72 text-sm text-ink-soft">
           {finished
-            ? `${deliveredStops.length} ${deliveredStops.length === 1 ? "drop" : "drops"} delivered with proof. That is ${formatEuro(deliveredStops.length * SHIFT_RATES.dropBonusCents)} in drop bonus.`
+            ? `${deliveredStops.length} ${deliveredStops.length === 1 ? "drop" : "drops"} delivered with proof this shift, ${formatEuro(deliveredStops.length * SHIFT_RATES.dropBonusCents)} in drop bonus.`
             : "Pick up a neighbourhood crate at the Markt hub and the route appears here."}
         </p>
         <button
@@ -51,18 +53,21 @@ export function RouteView({ onGoToHub }: { onGoToHub: () => void }) {
           onClick={onGoToHub}
           className="mt-5 min-h-13 rounded-xl bg-awning px-6 text-sm font-bold text-white active:scale-[0.99]"
         >
-          {finished ? "Take another crate" : "Go to the Markt hub"}
+          {cratesWaiting > 0
+            ? `Back to the hub, ${cratesWaiting} ${cratesWaiting === 1 ? "crate" : "crates"} waiting`
+            : "Back to the Markt hub"}
         </button>
       </div>
     );
   }
 
-  const totalStops = myStops.length + deliveredStops.length;
-  const stopIndex = deliveredStops.length + 1;
+  // Counted per crate: an earlier crate this shift is not part of this ride.
+  const totalStops = currentCrate.stops.length;
+  const stopIndex = currentCrate.deliveredCount + 1;
   const clusterTitle = CLUSTER_META[currentStop.cluster].shortTitle;
 
-  // The leg starts wherever the courier finished the last drop.
-  const previousStop = deliveredStops[deliveredStops.length - 1];
+  // The leg starts at the last door in this crate, or the hub for the first.
+  const previousStop = currentCrate.previousStop;
   const originAddress = previousStop?.address ?? MARKT_HUB.address;
   const originLabel = previousStop
     ? previousStop.address.split(",")[0]
@@ -71,6 +76,7 @@ export function RouteView({ onGoToHub }: { onGoToHub: () => void }) {
   return (
     <div className="relative h-full overflow-hidden">
       <RouteMap
+        key={currentStop.id}
         stop={currentStop}
         originAddress={originAddress}
         originLabel={originLabel}
@@ -86,7 +92,7 @@ export function RouteView({ onGoToHub }: { onGoToHub: () => void }) {
           clusterTitle={clusterTitle}
           progress={progress}
           minutesLeft={minutesToCurrentStop}
-          dropsAfterThis={myStops.length - 1}
+          dropsAfterThis={totalStops - stopIndex}
           onStart={startRide}
           onArrived={markArrived}
           onConfirmDrop={() => setProofOpen(true)}

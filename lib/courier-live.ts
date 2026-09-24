@@ -45,7 +45,8 @@ export function orderToDeliveryStop(order: LiveOrder): DeliveryStop {
     customerName: order.customer_name,
     customerPhone: order.phone,
     address,
-    addressHint: order.note?.trim() || "Live order from the shop",
+    // The customer note already shows as deliveryNotes; no second copy here.
+    addressHint: "",
     areaLabel: areaLabelFromAddress(address),
     coords,
     deliveryNotes: order.note?.trim() || undefined,
@@ -68,8 +69,10 @@ export function orderToDeliveryStop(order: LiveOrder): DeliveryStop {
 }
 
 /**
- * Home-delivery orders the picker has marked ready (or already out for
- * delivery). Returns [] when the DB is empty or unavailable.
+ * Home-delivery orders the picker has marked ready and nobody has ridden out
+ * with yet. Orders already "out" belong to the courier carrying them (kept in
+ * their own browser state), so offering them again would double-deliver.
+ * Returns [] when the DB is empty or unavailable.
  */
 export async function fetchReadyHomeStops(): Promise<{
   stops: DeliveryStop[];
@@ -80,7 +83,7 @@ export async function fetchReadyHomeStops(): Promise<{
       .from("orders")
       .select("*, order_items(*, product:products(*))")
       .eq("fulfilment", "home")
-      .in("status", ["ready", "out"])
+      .eq("status", "ready")
       .order("id", { ascending: true })
       .limit(40);
 

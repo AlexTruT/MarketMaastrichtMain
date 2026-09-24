@@ -91,8 +91,12 @@ export function RouteSheet({
       </button>
 
       <div className="max-h-[52dvh] overflow-y-auto px-4 pb-4">
-        {/* Where we are in the batch */}
-        <div className="flex items-center gap-1.5">
+        {/* Where we are in this crate */}
+        <div
+          className="flex items-center gap-1.5"
+          role="img"
+          aria-label={`Drop ${stopIndex} of ${totalStops}`}
+        >
           {Array.from({ length: totalStops }).map((_, index) => (
             <span
               key={index}
@@ -106,7 +110,7 @@ export function RouteSheet({
             />
           ))}
           <span className="ml-1 shrink-0 text-[11px] font-semibold text-ink-faint">
-            {stopIndex}/{totalStops}
+            Drop {stopIndex} of {totalStops}
           </span>
         </div>
 
@@ -138,7 +142,11 @@ export function RouteSheet({
           <div className="min-w-0 flex-1">
             <p className="text-sm font-semibold">{stop.customerName}</p>
             <p className="text-sm text-ink-soft">{stop.address}</p>
-            <p className="mt-0.5 text-xs text-ink-faint">{stop.addressHint}</p>
+            {stop.addressHint && (
+              <p className="mt-0.5 text-xs font-semibold text-ink">
+                {stop.addressHint}
+              </p>
+            )}
           </div>
           <a
             href={`tel:${stop.customerPhone}`}

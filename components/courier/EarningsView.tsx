@@ -1,12 +1,12 @@
 "use client";
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
 import type { CourierProfile } from "@/lib/courier-types";
 import { useCourierStore } from "@/lib/courier-store";
 import { CLUSTER_META } from "@/lib/courier-mock-data";
 import { calculateShiftPayout, formatEuro, SHIFT_RATES } from "@/lib/courier";
-import { Package } from "lucide-react";
+import { Package, RotateCcw } from "lucide-react";
 import { CourierAvatar } from "./CourierProfileCard";
 
 function timeOf(iso?: string) {
@@ -19,12 +19,29 @@ function timeOf(iso?: string) {
 }
 
 export function EarningsView({ profile }: { profile: CourierProfile }) {
-  const { deliveredStops, hoursWorked, resetShift } = useCourierStore();
+  const { deliveredStops, myStops, hoursWorked, resetShift } = useCourierStore();
   const payout = calculateShiftPayout(hoursWorked, deliveredStops.length);
   const cluster = CLUSTER_META[profile.preferredCluster];
+  // Reset throws away the shift, so it takes a second tap to confirm.
+  const [confirmingReset, setConfirmingReset] = useState(false);
+
+  useEffect(() => {
+    if (!confirmingReset) return;
+    const timeout = setTimeout(() => setConfirmingReset(false), 4000);
+    return () => clearTimeout(timeout);
+  }, [confirmingReset]);
+
+  const onReset = () => {
+    if (!confirmingReset) {
+      setConfirmingReset(true);
+      return;
+    }
+    setConfirmingReset(false);
+    resetShift();
+  };
 
   return (
-    <div className="flex flex-col gap-4 px-4 pt-4">
+    <div className="mx-auto flex w-full max-w-160 flex-col gap-4 px-4 pt-4">
       <section className="rounded-md bg-paper p-4 ring-1 ring-cobble">
         <div className="flex items-center gap-3.5">
           <CourierAvatar profile={profile} size="lg" />
@@ -60,7 +77,10 @@ export function EarningsView({ profile }: { profile: CourierProfile }) {
         <dl className="mt-4 divide-y divide-cobble text-sm">
           <div className="flex justify-between gap-3 py-2.5">
             <dt className="text-ink-soft">
-              Hourly guarantee, {formatEuro(SHIFT_RATES.baseHourlyCents)}/h
+              Hourly, {formatEuro(SHIFT_RATES.baseHourlyCents)}/h
+              <span className="block text-[11px] text-ink-faint">
+                Two hours guaranteed, however quiet the market
+              </span>
             </dt>
             <dd className="font-medium">{formatEuro(payout.basePayCents)}</dd>
           </div>
@@ -128,10 +148,19 @@ export function EarningsView({ profile }: { profile: CourierProfile }) {
 
       <button
         type="button"
-        onClick={resetShift}
-        className="min-h-12 rounded-xl border border-dashed border-cobble bg-paper text-xs font-semibold text-ink-soft active:scale-[0.99]"
+        onClick={onReset}
+        className={`flex min-h-12 items-center justify-center gap-2 rounded-xl border border-dashed text-xs font-semibold active:scale-[0.99] ${
+          confirmingReset
+            ? "border-maastricht-red bg-maastricht-red/8 text-maastricht-red"
+            : "border-cobble bg-paper text-ink-soft"
+        }`}
       >
-        Reset the demo shift
+        <RotateCcw aria-hidden className="size-4" />
+        {confirmingReset
+          ? myStops.length > 0
+            ? "Tap again: hand the crate back and restart"
+            : "Tap again to restart the shift"
+          : "Reset the demo shift"}
       </button>
     </div>
   );

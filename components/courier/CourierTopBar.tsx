@@ -3,26 +3,27 @@
 import React from "react";
 import Link from "next/link";
 import type { CourierProfile } from "@/lib/courier-types";
-import { MARKT_HUB } from "@/lib/courier-mock-data";
+import { ChevronLeft } from "lucide-react";
 import { CourierAvatar } from "./CourierProfileCard";
 
 export function CourierTopBar({
   profile,
   dropsDone,
-  totalDrops,
+  dropsToGo,
 }: {
   profile: CourierProfile;
   dropsDone: number;
-  totalDrops: number;
+  dropsToGo: number;
 }) {
   return (
-    <header className="z-30 shrink-0 bg-paper">
-      <div className="mx-auto flex w-full max-w-160 items-center gap-3 px-4 py-3">
+    <header className="z-30 shrink-0 border-b border-cobble bg-paper">
+      <div className="mx-auto flex w-full max-w-160 items-center gap-2.5 px-4 py-2.5">
         <Link
           href="/courier"
-          className="shrink-0 rounded-full focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none"
+          className="-ml-1.5 flex shrink-0 items-center rounded-full py-1 pr-1 focus-visible:ring-2 focus-visible:ring-awning focus-visible:outline-none"
           aria-label={`Switch courier, currently ${profile.name}`}
         >
+          <ChevronLeft aria-hidden className="size-4 text-ink-faint" />
           <CourierAvatar profile={profile} size="sm" />
         </Link>
 
@@ -35,22 +36,14 @@ export function CourierTopBar({
           </p>
         </div>
 
-        <div className="shrink-0 text-right">
+        <div className="shrink-0 text-right" aria-live="polite">
           <p className="text-sm leading-tight font-semibold text-awning tabular-nums">
-            {dropsDone}/{totalDrops || "–"}
+            {dropsDone} {dropsDone === 1 ? "drop" : "drops"}
           </p>
-          <p className="text-xs leading-tight text-ink-soft">drops done</p>
+          <p className="text-xs leading-tight text-ink-soft tabular-nums">
+            {dropsToGo > 0 ? `${dropsToGo} to go` : "delivered"}
+          </p>
         </div>
-      </div>
-
-      <div className="mx-auto flex w-full max-w-160 items-center gap-2 border-t border-cobble px-4 py-2 text-xs text-ink-soft">
-        <span className="relative flex h-2 w-2">
-          <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-awning opacity-60" />
-          <span className="relative inline-flex h-2 w-2 rounded-full bg-awning" />
-        </span>
-        <span className="font-medium text-ink">{MARKT_HUB.name}</span>
-        <span aria-hidden>·</span>
-        <span className="truncate">{MARKT_HUB.windowLabel}</span>
       </div>
     </header>
   );

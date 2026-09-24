@@ -112,7 +112,10 @@ export interface DeliveryStop {
   liveOrderId?: number;
   /** Courier profile id that claimed this stop, undefined while in the pool. */
   assignedTo?: string;
+  /** Shared by every stop taken in one claim, so it doubles as the crate id. */
   claimedAt?: string;
+  /** Set when the courier leaves for this drop; drives the demo ride clock. */
+  rideStartedAt?: string;
   arrivedAt?: string;
   deliveredAt?: string;
   proof?: ProofOfDrop;

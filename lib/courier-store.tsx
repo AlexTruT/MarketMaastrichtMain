@@ -30,29 +30,53 @@ import {
  */
 const RIDE_DEMO_MS = 40000;
 
-const STORAGE_KEY = "merret-courier-v1";
+/** Couriers are on a two hour guaranteed block during the demo shift. */
+const GUARANTEED_HOURS = 2;
 
+const FIRST_INCOMING_ORDER = 1051;
+
+// v2: ride clock moved onto each stop and shift clocks keyed per courier, so
+// two couriers sharing one browser no longer overwrite each other's timers.
+const STORAGE_KEY = "merret-courier-v2";
+
+/**
+ * One demo world shared by every courier on this browser: the hub pool, who
+ * claimed what, and each courier's shift start.
+ */
 interface PersistedState {
   stops: DeliveryStop[];
-  shiftStartedAt: string;
-  rideStartedAt: string | null;
+  /** Courier id to ISO time the shift started. */
+  shifts: Record<string, string>;
   nextOrderNumber: number;
   /** When true, hub is showing live DB stops rather than mock demo data. */
-  liveMode?: boolean;
+  liveMode: boolean;
+}
+
+export type LiveStatus = "demo" | "live" | "locked";
+
+/** The crate the courier is riding right now. */
+export interface CurrentCrate {
+  stops: DeliveryStop[];
+  deliveredCount: number;
+  /** The drop just finished, where the current leg starts. Null means the hub. */
+  previousStop: DeliveryStop | null;
 }
 
 interface CourierStoreValue {
   courierId: string;
   ready: boolean;
-  /** True when the hub queue is backed by ready home-delivery orders. */
-  liveMode: boolean;
+  liveStatus: LiveStatus;
   liveError: string | null;
+  refreshing: boolean;
+  lastRefreshedAt: string | null;
 
   /** Unclaimed batches still sitting at the Markt hub. */
   batches: DeliveryBatch[];
   /** Stops this courier is carrying, in riding order. */
   myStops: DeliveryStop[];
   currentStop: DeliveryStop | null;
+  currentCrate: CurrentCrate | null;
+  /** Everything this courier delivered this shift, oldest first. */
   deliveredStops: DeliveryStop[];
 
   /** 0 to 1 along the current leg. */
@@ -78,13 +102,54 @@ function freshDemoStops(): DeliveryStop[] {
   return DEMO_STOPS.map((stop) => ({ ...stop, source: "demo" as const }));
 }
 
+/**
+ * Swap in a new hub pool without touching anything a courier already holds.
+ *
+ * Claimed stops (riding or delivered) are shift history and earnings, so they
+ * always survive. Orders the coordinator pushed mid-demo survive while the
+ * hub stays on demo data.
+ */
+function mergePool(
+  previous: DeliveryStop[],
+  incoming: DeliveryStop[],
+): DeliveryStop[] {
+  const claimed = previous.filter((stop) => stop.assignedTo);
+  const taken = new Set(claimed.map((stop) => stop.id));
+  const incomingIds = new Set(incoming.map((stop) => stop.id));
+  const incomingIsDemo = incoming.every((stop) => stop.source !== "live");
+  const pushedExtras = incomingIsDemo
+    ? previous.filter(
+        (stop) =>
+          !stop.assignedTo &&
+          stop.source === "demo" &&
+          !incomingIds.has(stop.id),
+      )
+    : [];
+
+  return [
+    ...claimed,
+    ...incoming.filter((stop) => !taken.has(stop.id)),
+    ...pushedExtras,
+  ];
+}
+
+function isPersistedState(value: unknown): value is PersistedState {
+  if (!value || typeof value !== "object") return false;
+  const state = value as Partial<PersistedState>;
+  return (
+    Array.isArray(state.stops) &&
+    !!state.shifts &&
+    typeof state.shifts === "object" &&
+    typeof state.nextOrderNumber === "number"
+  );
+}
+
 function readPersisted(): PersistedState | null {
   try {
     const raw = window.localStorage.getItem(STORAGE_KEY);
     if (!raw) return null;
-    const parsed = JSON.parse(raw) as PersistedState;
-    if (!Array.isArray(parsed.stops) || parsed.stops.length === 0) return null;
-    return parsed;
+    const parsed: unknown = JSON.parse(raw);
+    return isPersistedState(parsed) ? parsed : null;
   } catch {
     return null;
   }
@@ -92,10 +157,42 @@ function readPersisted(): PersistedState | null {
 
 function writePersisted(state: PersistedState) {
   try {
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    const raw = JSON.stringify(state);
+    // Skipping identical writes keeps two open tabs from echoing each
+    // other's storage events forever.
+    if (window.localStorage.getItem(STORAGE_KEY) === raw) return;
+    window.localStorage.setItem(STORAGE_KEY, raw);
   } catch {
-    // Private browsing or a full quota: the demo keeps working in memory.
+    // Most likely the quota. Keep the shift and drop the proof photos, which
+    // are the only large thing in here, rather than stop saving altogether.
+    try {
+      const lean = {
+        ...state,
+        stops: state.stops.map((stop) =>
+          stop.proof?.photoDataUrl
+            ? { ...stop, proof: { ...stop.proof, photoDataUrl: undefined } }
+            : stop,
+        ),
+      };
+      window.localStorage.setItem(STORAGE_KEY, JSON.stringify(lean));
+    } catch {
+      // Private browsing: the demo keeps working in memory.
+    }
   }
+}
+
+/**
+ * What the courier picker shows on each card, read straight from storage so
+ * the picker page needs no provider.
+ */
+export function readCourierSummary(
+  courierId: string,
+): { toGo: number; delivered: number } | null {
+  const state = readPersisted();
+  if (!state) return null;
+  const mine = state.stops.filter((stop) => stop.assignedTo === courierId);
+  const delivered = mine.filter((stop) => stop.status === "delivered").length;
+  return { toGo: mine.length - delivered, delivered };
 }
 
 export function CourierStoreProvider({
@@ -106,158 +203,191 @@ export function CourierStoreProvider({
   children: React.ReactNode;
 }) {
   const [stops, setStops] = useState<DeliveryStop[]>(freshDemoStops);
-  const [shiftStartedAt, setShiftStartedAt] = useState<string>("");
-  const [rideStartedAt, setRideStartedAt] = useState<string | null>(null);
-  const [nextOrderNumber, setNextOrderNumber] = useState(1051);
+  const [shifts, setShifts] = useState<Record<string, string>>({});
+  const [nextOrderNumber, setNextOrderNumber] = useState(FIRST_INCOMING_ORDER);
+  const [liveMode, setLiveMode] = useState(false);
   const [incomingAlert, setIncomingAlert] = useState<string | null>(null);
   const [ready, setReady] = useState(false);
-  const [liveMode, setLiveMode] = useState(false);
+  const [locked, setLocked] = useState(false);
   const [liveError, setLiveError] = useState<string | null>(null);
+  const [refreshing, setRefreshing] = useState(false);
+  const [lastRefreshedAt, setLastRefreshedAt] = useState<string | null>(null);
+  // Fast tick while riding (the marker moves), slow tick otherwise (hours).
   const [now, setNow] = useState(0);
 
-  const applyLiveOrDemo = useCallback((liveStops: DeliveryStop[]) => {
-    if (liveStops.length > 0) {
-      setStops(liveStops);
-      setLiveMode(true);
-      setLiveError(null);
-      return;
-    }
-    setStops(freshDemoStops());
-    setLiveMode(false);
+  const shiftStartedAt = shifts[courierId] ?? "";
+
+  /** Fetch live orders and fold them (or the demo queue) into the hub pool. */
+  const loadPool = useCallback(async () => {
+    const result = await loadCourierReadyStops().catch(() => ({
+      stops: [] as DeliveryStop[],
+      error: "Could not reach the server.",
+      locked: false,
+    }));
+    const isLive = result.stops.length > 0;
+    const incoming = isLive ? result.stops : freshDemoStops();
+
+    setStops((previous) => mergePool(previous, incoming));
+    setLiveMode(isLive);
+    setLocked(result.locked);
+    setLiveError(result.error);
+    setLastRefreshedAt(new Date().toISOString());
   }, []);
 
   const refreshLiveStops = useCallback(async () => {
-    const result = await loadCourierReadyStops();
-    if (result.error) {
-      setLiveError(result.error);
+    setRefreshing(true);
+    try {
+      await loadPool();
+    } finally {
+      setRefreshing(false);
     }
-    // Keep an in-progress live route; only refresh the hub pool when idle.
-    setStops((previous) => {
-      const mine = previous.filter(
-        (stop) => stop.assignedTo === courierId && stop.status !== "delivered"
-      );
-      if (mine.length > 0) {
-        if (result.stops.length > 0) setLiveMode(true);
-        return previous;
-      }
-      if (result.stops.length > 0) {
-        setLiveMode(true);
-        setLiveError(null);
-        return result.stops;
-      }
-      setLiveMode(false);
-      return freshDemoStops();
-    });
-  }, [courierId]);
+  }, [loadPool]);
 
   // Restore after mount so the server and first client render agree, then
-  // prefer live ready home orders when the DB has any.
+  // refresh the hub pool from the database.
   useEffect(() => {
     let cancelled = false;
 
     async function boot() {
       const persisted = readPersisted();
-      if (persisted && !cancelled) {
+      if (persisted) {
         setStops(persisted.stops);
-        setShiftStartedAt(persisted.shiftStartedAt);
-        setRideStartedAt(persisted.rideStartedAt);
+        setShifts(persisted.shifts);
         setNextOrderNumber(persisted.nextOrderNumber);
-        setLiveMode(!!persisted.liveMode);
-      } else if (!cancelled) {
-        setShiftStartedAt(new Date().toISOString());
+        setLiveMode(persisted.liveMode);
       }
-
-      const result = await loadCourierReadyStops();
-      if (cancelled) return;
-
-      if (result.error) setLiveError(result.error);
-
-      const hasActiveMine =
-        persisted?.stops.some(
-          (stop) =>
-            stop.assignedTo === courierId && stop.status !== "delivered"
-        ) ?? false;
-
-      if (!hasActiveMine) {
-        applyLiveOrDemo(result.stops);
-      } else if (result.stops.length > 0) {
-        setLiveMode(true);
+      if (!persisted?.shifts[courierId]) {
+        const startedAt = new Date().toISOString();
+        setShifts((previous) => ({ ...previous, [courierId]: startedAt }));
       }
-
+      setNow(Date.now());
       setReady(true);
+
+      if (!cancelled) await loadPool();
     }
 
     void boot();
     return () => {
       cancelled = true;
     };
-  }, [applyLiveOrDemo, courierId]);
+  }, [courierId, loadPool]);
 
   useEffect(() => {
-    if (!ready || !shiftStartedAt) return;
-    writePersisted({
-      stops,
-      shiftStartedAt,
-      rideStartedAt,
-      nextOrderNumber,
-      liveMode,
-    });
-  }, [ready, stops, shiftStartedAt, rideStartedAt, nextOrderNumber, liveMode]);
+    if (!ready) return;
+    writePersisted({ stops, shifts, nextOrderNumber, liveMode });
+  }, [ready, stops, shifts, nextOrderNumber, liveMode]);
+
+  // Another tab (say Emma's, next to Alex's) claimed or delivered something.
+  useEffect(() => {
+    const onStorage = (event: StorageEvent) => {
+      if (event.key !== STORAGE_KEY) return;
+      const persisted = readPersisted();
+      if (!persisted) return;
+      setStops(persisted.stops);
+      setShifts(persisted.shifts);
+      setNextOrderNumber(persisted.nextOrderNumber);
+      setLiveMode(persisted.liveMode);
+    };
+    window.addEventListener("storage", onStorage);
+    return () => window.removeEventListener("storage", onStorage);
+  }, []);
 
   const myStops = useMemo(
     () =>
       stops.filter(
-        (stop) => stop.assignedTo === courierId && stop.status !== "delivered"
+        (stop) => stop.assignedTo === courierId && stop.status !== "delivered",
       ),
-    [stops, courierId]
+    [stops, courierId],
   );
 
   const deliveredStops = useMemo(
     () =>
-      stops.filter(
-        (stop) => stop.assignedTo === courierId && stop.status === "delivered"
-      ),
-    [stops, courierId]
+      stops
+        .filter(
+          (stop) =>
+            stop.assignedTo === courierId && stop.status === "delivered",
+        )
+        .sort((a, b) =>
+          (a.deliveredAt ?? "").localeCompare(b.deliveredAt ?? ""),
+        ),
+    [stops, courierId],
   );
 
   const currentStop = myStops[0] ?? null;
   const isRiding = currentStop?.status === "riding";
 
-  // Ticking clock, only while the marker actually needs to move.
+  const currentCrate = useMemo<CurrentCrate | null>(() => {
+    if (!currentStop) return null;
+    const crateStops = stops.filter(
+      (stop) =>
+        stop.assignedTo === courierId &&
+        stop.claimedAt === currentStop.claimedAt,
+    );
+    const delivered = crateStops
+      .filter((stop) => stop.status === "delivered")
+      .sort((a, b) =>
+        (a.deliveredAt ?? "").localeCompare(b.deliveredAt ?? ""),
+      );
+    return {
+      stops: crateStops,
+      deliveredCount: delivered.length,
+      previousStop: delivered[delivered.length - 1] ?? null,
+    };
+  }, [stops, courierId, currentStop]);
+
   useEffect(() => {
-    if (!isRiding) return;
-    setNow(Date.now());
-    const interval = setInterval(() => setNow(Date.now()), 250);
+    if (!ready) return;
+    const interval = setInterval(
+      () => setNow(Date.now()),
+      isRiding ? 250 : 30000,
+    );
     return () => clearInterval(interval);
-  }, [isRiding, currentStop?.id]);
+  }, [ready, isRiding]);
 
   const progress = useMemo(() => {
     if (!currentStop) return 0;
     if (currentStop.status === "arrived") return 1;
-    if (currentStop.status !== "riding" || !rideStartedAt) return 0;
-    const elapsed = now - new Date(rideStartedAt).getTime();
+    if (currentStop.status !== "riding" || !currentStop.rideStartedAt) return 0;
+    const elapsed = now - new Date(currentStop.rideStartedAt).getTime();
     return Math.min(Math.max(elapsed / RIDE_DEMO_MS, 0), 1);
-  }, [currentStop, rideStartedAt, now]);
+  }, [currentStop, now]);
 
-  const setStopStatus = useCallback(
+  const patchStop = useCallback(
     (stopId: string, patch: Partial<DeliveryStop>) => {
       setStops((previous) =>
         previous.map((stop) =>
-          stop.id === stopId ? { ...stop, ...patch } : stop
-        )
+          stop.id === stopId ? { ...stop, ...patch } : stop,
+        ),
       );
     },
-    []
+    [],
+  );
+
+  const syncLiveStatus = useCallback(
+    (stop: DeliveryStop, status: "ready" | "out" | "delivered") => {
+      if (stop.source !== "live" || !stop.liveOrderId) return;
+      void setCourierOrderStatus(stop.liveOrderId, status)
+        .then((result) => {
+          if ("error" in result) {
+            setIncomingAlert(`${stop.orderNumber}: ${result.error}`);
+          }
+        })
+        .catch(() => {
+          setIncomingAlert(
+            `${stop.orderNumber}: offline, the shop was not updated.`,
+          );
+        });
+    },
+    [],
   );
 
   const markArrived = useCallback(() => {
-    if (!currentStop || currentStop.status === "arrived") return;
-    setStopStatus(currentStop.id, {
+    if (currentStop?.status !== "riding") return;
+    patchStop(currentStop.id, {
       status: "arrived",
       arrivedAt: new Date().toISOString(),
     });
-    setRideStartedAt(null);
-  }, [currentStop, setStopStatus]);
+  }, [currentStop, patchStop]);
 
   // Arriving is automatic once the leg is ridden, the courier only confirms.
   useEffect(() => {
@@ -268,6 +398,7 @@ export function CourierStoreProvider({
 
   const claimBatch = useCallback(
     (cluster: DeliveryCluster) => {
+      if (myStops.length > 0) return;
       const claimedAt = new Date().toISOString();
       setStops((previous) =>
         previous.map((stop) =>
@@ -275,49 +406,35 @@ export function CourierStoreProvider({
           !stop.assignedTo &&
           stop.status === "queued"
             ? { ...stop, assignedTo: courierId, claimedAt }
-            : stop
-        )
+            : stop,
+        ),
       );
     },
-    [courierId]
+    [courierId, myStops.length],
   );
 
   const startRide = useCallback(() => {
-    if (!currentStop || currentStop.status !== "queued") return;
-    setStopStatus(currentStop.id, { status: "riding" });
-    setRideStartedAt(new Date().toISOString());
-    if (currentStop.source === "live" && currentStop.liveOrderId) {
-      void setCourierOrderStatus(currentStop.liveOrderId, "out").then(
-        (result) => {
-          if ("error" in result) {
-            setIncomingAlert(`Could not mark order out: ${result.error}`);
-          }
-        }
-      );
-    }
-  }, [currentStop, setStopStatus]);
+    if (currentStop?.status !== "queued") return;
+    const rideStartedAt = new Date().toISOString();
+    patchStop(currentStop.id, { status: "riding", rideStartedAt });
+    setNow(Date.now());
+    syncLiveStatus(currentStop, "out");
+  }, [currentStop, patchStop, syncLiveStatus]);
 
   const completeDrop = useCallback(
     (proof: Omit<ProofOfDrop, "capturedAt">) => {
-      if (!currentStop) return;
+      // Only from the doorstep, and only once: a double tap on the confirm
+      // button must not deliver twice.
+      if (currentStop?.status !== "arrived") return;
       const capturedAt = new Date().toISOString();
-      const liveOrderId = currentStop.liveOrderId;
-      const isLive = currentStop.source === "live" && !!liveOrderId;
-      setStopStatus(currentStop.id, {
+      patchStop(currentStop.id, {
         status: "delivered",
         deliveredAt: capturedAt,
         proof: { ...proof, capturedAt },
       });
-      setRideStartedAt(null);
-      if (isLive && liveOrderId) {
-        void setCourierOrderStatus(liveOrderId, "delivered").then((result) => {
-          if ("error" in result) {
-            setIncomingAlert(`Could not mark delivered: ${result.error}`);
-          }
-        });
-      }
+      syncLiveStatus(currentStop, "delivered");
     },
-    [currentStop, setStopStatus]
+    [currentStop, patchStop, syncLiveStatus],
   );
 
   const pushIncomingOrder = useCallback(() => {
@@ -342,7 +459,7 @@ export function CourierStoreProvider({
     ]);
     setNextOrderNumber((value) => value + 1);
     setIncomingAlert(
-      `New order ${orderNumber} packed for ${template.customerName}, ${template.address.split(",")[0]}`
+      `New order ${orderNumber} packed for ${template.areaLabel}`,
     );
   }, [nextOrderNumber]);
 
@@ -352,43 +469,58 @@ export function CourierStoreProvider({
     return () => clearTimeout(timeout);
   }, [incomingAlert]);
 
+  /**
+   * Start this courier's shift over. Their drops go back to the hub (demo)
+   * or back to "ready" in the shop (live, if still on the bike). Other
+   * couriers' crates are left alone.
+   */
   const resetShift = useCallback(() => {
-    setRideStartedAt(null);
-    setNextOrderNumber(1051);
-    setShiftStartedAt(new Date().toISOString());
+    for (const stop of myStops) {
+      if (stop.status === "riding" || stop.status === "arrived") {
+        syncLiveStatus(stop, "ready");
+      }
+    }
+    setStops((previous) =>
+      previous.filter((stop) => stop.assignedTo !== courierId),
+    );
+    setShifts((previous) => ({
+      ...previous,
+      [courierId]: new Date().toISOString(),
+    }));
     setIncomingAlert(null);
     void refreshLiveStops();
-  }, [refreshLiveStops]);
+  }, [courierId, myStops, refreshLiveStops, syncLiveStatus]);
 
   const batches = useMemo(
     () => groupIntoBatches(stops.filter((stop) => !stop.assignedTo)),
-    [stops]
+    [stops],
   );
 
   const minutesToCurrentStop = useMemo(() => {
-    if (!currentStop) return 0;
-    const remaining = rideMinutes(
-      pathLengthMeters(currentStop.legFromPrevious) * (1 - progress)
+    if (!currentStop || currentStop.status === "arrived") return 0;
+    return rideMinutes(
+      pathLengthMeters(currentStop.legFromPrevious) * (1 - progress),
     );
-    return currentStop.status === "arrived" ? 0 : remaining;
   }, [currentStop, progress]);
 
   const hoursWorked = useMemo(() => {
-    if (!shiftStartedAt) return 0;
+    if (!shiftStartedAt || !now) return GUARANTEED_HOURS;
     const elapsedHours =
-      (Date.now() - new Date(shiftStartedAt).getTime()) / 3600000;
-    // Couriers are on a two hour guaranteed block during the demo shift.
-    return Math.max(2, Math.round(elapsedHours * 10) / 10);
-  }, [shiftStartedAt]);
+      (now - new Date(shiftStartedAt).getTime()) / 3600000;
+    return Math.max(GUARANTEED_HOURS, Math.round(elapsedHours * 10) / 10);
+  }, [shiftStartedAt, now]);
 
   const value: CourierStoreValue = {
     courierId,
     ready,
-    liveMode,
+    liveStatus: liveMode ? "live" : locked ? "locked" : "demo",
     liveError,
+    refreshing,
+    lastRefreshedAt,
     batches,
     myStops,
     currentStop,
+    currentCrate,
     deliveredStops,
     progress,
     minutesToCurrentStop,

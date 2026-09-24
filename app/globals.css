@@ -194,8 +194,11 @@
   }
 }
 
+/* `backwards`, not `both`: a transform left on the wrapper after the animation
+   would become the containing block for `position: fixed` descendants and
+   collapse full-screen tools like /courier to a zero-height box. */
 .page-enter {
-  animation: page-enter 180ms ease-out both;
+  animation: page-enter 180ms ease-out backwards;
 }
 
 /* View Transitions API (experimental.viewTransition) — short crossfade. */

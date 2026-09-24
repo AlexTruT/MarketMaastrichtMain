@@ -8,7 +8,7 @@ import { CourierTabBar, type CourierTab } from "./CourierTabBar";
 import { HubView } from "./HubView";
 import { RouteView } from "./RouteView";
 import { EarningsView } from "./EarningsView";
-import { Bell } from "lucide-react";
+import { Bell, X } from "lucide-react";
 
 function CourierShell({ profile }: { profile: CourierProfile }) {
   const { ready, batches, myStops, deliveredStops, incomingAlert, dismissAlert } =
@@ -28,18 +28,25 @@ function CourierShell({ profile }: { profile: CourierProfile }) {
       <CourierTopBar
         profile={profile}
         dropsDone={deliveredStops.length}
-        totalDrops={deliveredStops.length + myStops.length}
+        dropsToGo={myStops.length}
       />
 
       {incomingAlert && (
-        <button
-          type="button"
-          onClick={dismissAlert}
-          className="animate-drop-in z-30 shrink-0 bg-price-yellow px-4 py-2.5 text-left text-xs font-semibold"
+        <div
+          role="status"
+          className="animate-drop-in z-30 flex shrink-0 items-center gap-2 bg-price-yellow px-4 py-2 text-xs font-semibold"
         >
-          <Bell aria-hidden className="mr-1.5 inline size-4 align-text-bottom" />
-          {incomingAlert}
-        </button>
+          <Bell aria-hidden className="size-4 shrink-0" />
+          <span className="min-w-0 flex-1">{incomingAlert}</span>
+          <button
+            type="button"
+            onClick={dismissAlert}
+            aria-label="Dismiss"
+            className="-mr-2 flex size-8 shrink-0 items-center justify-center rounded-full active:bg-black/10"
+          >
+            <X aria-hidden className="size-4" />
+          </button>
+        </div>
       )}
 
       <main
@@ -52,7 +59,7 @@ function CourierShell({ profile }: { profile: CourierProfile }) {
             Opening your shift…
           </p>
         ) : tab === "hub" ? (
-          <HubView onClaimed={() => setTab("route")} />
+          <HubView profile={profile} onClaimed={() => setTab("route")} />
         ) : tab === "route" ? (
           <RouteView onGoToHub={() => setTab("hub")} />
         ) : (
