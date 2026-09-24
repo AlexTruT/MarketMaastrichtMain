@@ -7,9 +7,9 @@ import type {
   LatLng,
 } from "./courier-types";
 
-/** The Friday consolidation point on the Markt itself. */
+/** The Friday consolidation point by the Markt (not a market stall). */
 export const MARKT_HUB: HubLocation = {
-  name: "Merret stand, Markt",
+  name: "Merret pickup point, Markt",
   subtitle: "Crate staging behind the Stadhuis",
   address: "Markt 78, 6211 CL Maastricht",
   coords: [50.85135, 5.68885],

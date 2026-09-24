@@ -20,7 +20,7 @@ type PlaceOrderInput = {
 
 const SUBSTITUTIONS: Substitution[] = ["substitute", "skip", "call"];
 const TIME_WINDOWS = ["12:00 to 13:00", "13:00 to 14:00", "14:00 to 15:00"];
-const PICKUP_POINTS = ["Merret stand, Markt"];
+const PICKUP_POINTS = ["Merret pickup point, Markt"];
 const MAX_QTY = 99;
 
 // Server actions are real POST endpoints under the hood, so every field is

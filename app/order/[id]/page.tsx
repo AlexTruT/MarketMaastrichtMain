@@ -66,14 +66,14 @@ export default async function OrderConfirmationPage({
     },
     {
       time: "11:30",
-      text: `Your crate is packed at the Merret stand and labelled ${crateLabel}.`,
+      text: `Your crate is packed at the Merret pickup point and labelled ${crateLabel}.`,
     },
     {
       time: order.time_window.split(" to ")[0],
       text:
         order.fulfilment === "home"
-          ? `A courier picks up the crate at the Merret stand and rides it to ${order.address}.`
-          : "It is waiting for you at the Merret stand on the Markt.",
+          ? `A courier picks up the crate at the Merret pickup point and rides it to ${order.address}.`
+          : "It is waiting for you at the Merret pickup point by the Markt.",
     },
   ];
 

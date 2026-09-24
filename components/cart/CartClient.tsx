@@ -24,7 +24,7 @@ import { placeOrder } from "@/app/cart/actions";
 import type { Fulfilment, Product, Substitution } from "@/lib/types";
 
 const TIME_WINDOWS = ["12:00 to 13:00", "13:00 to 14:00", "14:00 to 15:00"];
-const PICKUP_POINTS = ["Merret stand, Markt"];
+const PICKUP_POINTS = ["Merret pickup point, Markt"];
 const DEFAULT_PICKUP_POINT = PICKUP_POINTS[0];
 const SUBSTITUTIONS: { value: Substitution; label: string; note: string }[] = [
   {
@@ -471,8 +471,8 @@ export function CartClient({ products, todayIso }: CartClientProps) {
                 clearError("address");
                 clearError("pickup");
               }}
-              title="Pickup at Merret stand"
-              note="Collect it on the Markt. No delivery fee."
+              title="Pickup by the Markt"
+              note="Collect it in the centre. No delivery fee."
               trailing="Free"
             />
           </div>
@@ -518,7 +518,7 @@ export function CartClient({ products, todayIso }: CartClientProps) {
                     clearError("pickup");
                   }}
                   title={point}
-                  note="Behind the Stadhuis on the Markt."
+                  note="A short walk from the Friday stalls."
                 />
               ))}
               {errors.pickup ? (

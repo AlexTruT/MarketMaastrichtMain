@@ -22,7 +22,7 @@ This is a hackathon demo built in 5 hours. It must work end to end on a phone an
 - Delivery windows: "12:00 to 13:00", "13:00 to 14:00", "14:00 to 15:00".
 - Fulfilment:
   - Home delivery: fee €4.50
-  - Pickup: free (€0). Only at "Merret stand, Markt" (on the Markt).
+  - Pickup: free (€0). Only at "Merret pickup point, Markt": a collection point by the Markt, not a market stall.
 - Substitution choice per order: "substitute" (shopper picks closest match), "skip" (leave it out), "call" (phone me).
 - Pricing:
   - Partner stall items have a fixed price: `price_min_cents = price_max_cents`.

@@ -190,13 +190,13 @@ insert into products (id, stall_id, name, unit, category, price_min_cents, price
 
 insert into orders (id, customer_name, phone, fulfilment, address, pickup_point, time_window, substitution, note, fee_cents) values
 (1, 'Maria', '06 1234 5601', 'home', 'Scharnerweg 12', null, '12:00 to 13:00', 'call', 'Please ring twice, I need a moment to get to the door', 450),
-(2, 'Daan', '06 1234 5602', 'pickup', null, 'Merret stand, Markt', '13:00 to 14:00', 'substitute', null, 0),
+(2, 'Daan', '06 1234 5602', 'pickup', null, 'Merret pickup point, Markt', '13:00 to 14:00', 'substitute', null, 0),
 (3, 'Fatima', '06 1234 5603', 'home', 'Tongersestraat 44', null, '13:00 to 14:00', 'skip', null, 450),
 (4, 'Jan', '06 1234 5604', 'home', 'Oranjeplein 8', null, '12:00 to 13:00', 'call', 'Leave with neighbour at number 10', 450),
-(5, 'Sophie', '06 1234 5605', 'pickup', null, 'Merret stand, Markt', '14:00 to 15:00', 'substitute', null, 0),
-(6, 'Tom', '06 1234 5606', 'pickup', null, 'Merret stand, Markt', '13:00 to 14:00', 'substitute', null, 0),
+(5, 'Sophie', '06 1234 5605', 'pickup', null, 'Merret pickup point, Markt', '14:00 to 15:00', 'substitute', null, 0),
+(6, 'Tom', '06 1234 5606', 'pickup', null, 'Merret pickup point, Markt', '13:00 to 14:00', 'substitute', null, 0),
 (7, 'Els', '06 1234 5607', 'home', 'Brusselsestraat 71', null, '14:00 to 15:00', 'call', null, 450),
-(8, 'Yusuf', '06 1234 5608', 'pickup', null, 'Merret stand, Markt', '12:00 to 13:00', 'skip', null, 0);
+(8, 'Yusuf', '06 1234 5608', 'pickup', null, 'Merret pickup point, Markt', '12:00 to 13:00', 'skip', null, 0);
 
 insert into order_items (order_id, product_id, qty, unit_min_cents, unit_max_cents) values
 (1, 1, 1, 350, 350), (1, 6, 1, 150, 150), (1, 25, 1, 395, 395), (1, 22, 2, 325, 325),
