@@ -22,7 +22,8 @@ const panelClass =
 
 /**
  * Deals and coming-soon share the same panel treatment and heading rhythm.
- * Stacked under 640px; half-width side by side from sm. Dense = 2-col shelves.
+ * Each panel is full width with the same shelf as the market grid below
+ * (2 / 3 / 4 across), so a handful of deals reads as one row, not a 2×2 block.
  */
 export function MarketHighlights({
   deals,
@@ -38,7 +39,7 @@ export function MarketHighlights({
   if (deals.length === 0 && comingSoon.length === 0) return null;
 
   return (
-    <div className="grid gap-10 sm:grid-cols-2 sm:items-start sm:gap-6">
+    <div className="flex flex-col gap-10 sm:gap-6">
       {deals.length > 0 && (
         <section id="deals" className={panelClass}>
           <h2 className="display-md text-maastricht-red">
@@ -47,7 +48,7 @@ export function MarketHighlights({
           <p className="text-meta max-w-[40ch] pt-1.5 text-ink/55">
             Checked on the boards this morning.
           </p>
-          <ProductShelf dense className="mt-5">
+          <ProductShelf className="mt-5">
             {cards(deals, stallNames, today)}
           </ProductShelf>
         </section>
@@ -59,7 +60,7 @@ export function MarketHighlights({
           <p className="text-meta max-w-[40ch] pt-1.5 text-ink/55">
             Date on the card is the Friday it lands.
           </p>
-          <ProductShelf dense className="mt-5">
+          <ProductShelf className="mt-5">
             {cards(comingSoon, stallNames, today)}
           </ProductShelf>
         </section>
