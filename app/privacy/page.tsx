@@ -10,7 +10,7 @@ export default function PrivacyPage() {
   return (
     <article className="page-narrow px-4 pt-8 pb-12">
       <h1 className="display-lg">Privacy</h1>
-      <p className="text-meta pt-2 text-ink/55">Last updated 21 September 2026</p>
+      <p className="text-meta pt-2 text-ink/55">Last updated 24 September 2026</p>
 
       <div className="text-lede flex flex-col gap-5 pt-6 text-ink/80">
         <p>
@@ -26,7 +26,8 @@ export default function PrivacyPage() {
             <li>Your name and phone number (so the shopper and courier can reach you).</li>
             <li>
               Delivery address or pickup point, time window, and any note you
-              leave at checkout.
+              leave at checkout. If you mention an allergy or health need in
+              the note, we use it only to shop and pack your order safely.
             </li>
             <li>What you ordered and the prices we recorded for that order.</li>
             <li>
@@ -34,6 +35,20 @@ export default function PrivacyPage() {
               screen (no SMS provider in this demo).
             </li>
           </ul>
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <h2 className="display-md text-ink">Proof of delivery</h2>
+          <p>
+            When a courier leaves a crate, they may take one photo of where
+            they left it and their phone records its location at that moment,
+            so we can show the crate arrived if something goes missing. We do
+            not follow couriers or customers on a live map: the location is
+            read once, at the drop. The photo and location stay on the
+            courier&apos;s phone, not on our servers, and are deleted when the
+            courier closes the shift. Couriers are told about this before their
+            first shift.
+          </p>
         </section>
 
         <section className="flex flex-col gap-2">
@@ -49,9 +64,11 @@ export default function PrivacyPage() {
           <h2 className="display-md text-ink">Who sees it</h2>
           <p>
             Our shopper and courier see what they need to fulfil the order.
-            Hosting providers that run this site may process the same data on
-            our behalf. Payment is cash or card when the crate is handed over —
-            we do not store card numbers online.
+            Our hosting and database providers (Vercel and Supabase) process
+            the same data on our behalf. When our shopper photographs a
+            stall&apos;s price board, the photo goes to Anthropic&apos;s AI to
+            read the prices. We photograph the board, not the people. You pay when you place the
+            order; we do not store card numbers.
           </p>
         </section>
 

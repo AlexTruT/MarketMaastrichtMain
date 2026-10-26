@@ -1,5 +1,7 @@
 // Types matching supabase.sql exactly. Keep in sync with that file.
 
+import type { Allergen } from "./allergens";
+
 export type Zone = "Stadhuis" | "Boschstraat" | "Mosae Forum";
 
 export type ProductCategory =
@@ -45,6 +47,8 @@ export type Product = {
   deal_starts_on: string | null; // ISO date string, null = active now
   emoji: string;
   sort: number;
+  /** EU allergen keys from lib/allergens.ts. null = not confirmed by the stall yet. */
+  allergens: Allergen[] | null;
 };
 
 export type Order = {
@@ -60,11 +64,11 @@ export type Order = {
   note: string | null;
   subtotal_min_cents: number;
   subtotal_max_cents: number;
-  /** 15% online markup snapshot on subtotal_min at order time. */
+  /** Service fee snapshot (15%, max €8) on subtotal_min at order time. Legacy column name. */
   markup_min_cents: number;
-  /** 15% online markup snapshot on subtotal_max at order time. */
+  /** Service fee snapshot (15%, max €8) on subtotal_max at order time. Legacy column name. */
   markup_max_cents: number;
-  /** Fulfilment only: home delivery or free pickup (not markup). */
+  /** Fulfilment only: home delivery or free pickup (not the service fee). */
   fee_cents: number;
   status: OrderStatus;
 };

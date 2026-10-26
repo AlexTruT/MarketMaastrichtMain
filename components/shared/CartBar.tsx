@@ -3,13 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useCart } from "@/lib/cart";
-import {
-  formatEuro,
-  isComingSoon,
-  lineTotals,
-  markupCents,
-  midpoint,
-} from "@/lib/pricing";
+import { formatRange, isComingSoon, lineTotals } from "@/lib/pricing";
 import type { Product } from "@/lib/types";
 
 type CartBarProps = {
@@ -49,9 +43,8 @@ export function CartBar({ products, today }: CartBarProps) {
     subtotalMin += line.min;
     subtotalMax += line.max;
   }
-  // Sticky bar shows groceries + online markup (delivery chosen at checkout).
-  const groceries = midpoint(subtotalMin, subtotalMax);
-  const barTotal = groceries + markupCents(groceries);
+  // Subtotal only, at stall prices. Service fee and delivery appear at checkout.
+  const subtotal = formatRange(subtotalMin, subtotalMax);
 
   return (
     <div className="cart-bar-enter pointer-events-none fixed inset-x-0 bottom-0 z-30 bg-paper pt-3 pb-[calc(env(safe-area-inset-bottom)+0.75rem)] lg:hidden">
@@ -68,8 +61,11 @@ export function CartBar({ products, today }: CartBarProps) {
           </span>
           <span className="truncate text-sm font-medium">View cart</span>
         </span>
-        <span className="shrink-0 text-sm font-semibold tabular-nums">
-          {formatEuro(barTotal)}
+        <span
+          className="shrink-0 text-sm font-semibold tabular-nums"
+          aria-label={`Subtotal ${subtotal}`}
+        >
+          {subtotal}
         </span>
       </Link>
       </div>

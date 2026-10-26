@@ -33,7 +33,9 @@ create table products (
   deal_note text,
   deal_starts_on date,                          -- null = active now, future date = "coming soon"
   emoji text not null,
-  sort int not null default 0
+  sort int not null default 0,
+  allergens text[]                              -- EU allergen keys; null = not confirmed by the stall yet
+    check (allergens <@ array['gluten','crustaceans','eggs','fish','peanuts','soy','milk','nuts','celery','mustard','sesame','sulphites','lupin','molluscs']::text[])
 );
 
 create table orders (
@@ -49,8 +51,8 @@ create table orders (
   note text,
   subtotal_min_cents int not null default 0,
   subtotal_max_cents int not null default 0,
-  markup_min_cents int not null default 0,       -- 15% online markup on subtotal_min
-  markup_max_cents int not null default 0,       -- 15% online markup on subtotal_max
+  markup_min_cents int not null default 0,       -- service fee 15%, max 800, on subtotal_min
+  markup_max_cents int not null default 0,       -- service fee 15%, max 800, on subtotal_max
   fee_cents int not null,                        -- fulfilment only (home 450 / pickup 0)
   status text not null default 'new' check (status in ('new','picking','ready','out','delivered'))
 );
@@ -186,6 +188,19 @@ insert into products (id, stall_id, name, unit, category, price_min_cents, price
 (36, null, 'Fresh herbs', 'per bunch', 'more', 100, 150, null, null, null, '🌿', 7),
 (37, null, 'Bell peppers', '3 pieces', 'more', 150, 250, null, null, null, '🫑', 8);
 
+-- Allergens (see supabase-allergens.sql) ------------------------------------
+-- Demo values. Real values come from each stall at onboarding.
+update products set allergens = '{}' where allergens is null;
+update products set allergens = '{fish}' where id in (13, 14, 16);
+update products set allergens = '{molluscs}' where id = 15;
+update products set allergens = '{milk}' where id in (17, 18, 19, 20, 55, 56, 57);
+update products set allergens = '{gluten,eggs,milk}' where id in (21, 22);
+update products set allergens = '{gluten}' where id = 23;
+update products set allergens = '{gluten,milk}' where id in (24, 54);
+update products set allergens = '{eggs}' where id = 25;
+-- Sausage seasoning varies by batch: left unconfirmed until the butcher says.
+update products set allergens = null where id = 62;
+
 -- Demo orders so the picker view is not empty --------------------------------
 
 insert into orders (id, customer_name, phone, fulfilment, address, pickup_point, time_window, substitution, note, fee_cents) values
@@ -213,7 +228,7 @@ update orders o set
   subtotal_max_cents = (select coalesce(sum(qty * unit_max_cents), 0) from order_items where order_id = o.id);
 
 update orders set
-  markup_min_cents = round(subtotal_min_cents * 0.15)::int,
-  markup_max_cents = round(subtotal_max_cents * 0.15)::int;
+  markup_min_cents = least(round(subtotal_min_cents * 0.15)::int, 800),
+  markup_max_cents = least(round(subtotal_max_cents * 0.15)::int, 800);
 
 select setval('orders_id_seq', (select max(id) from orders));

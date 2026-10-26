@@ -22,15 +22,19 @@ This is a hackathon demo built in 5 hours. It must work end to end on a phone an
 - Delivery windows: "12:00 to 13:00", "13:00 to 14:00", "14:00 to 15:00".
 - Fulfilment:
   - Home delivery: fee €4.50
-  - Pickup: free (€0). Only at "Merret pickup point, Markt": a collection point by the Markt, not a market stall.
+  - Pickup: free (€0). Only at "Merret pickup point, Markt": an off-market collection point by the Markt, not a stall. Market rules only let stalls sell goods from their own branch, so Merret cannot run a pickup stand on the Markt itself (see README, Legal due diligence).
 - Substitution choice per order: "substitute" (shopper picks closest match), "skip" (leave it out), "call" (phone me).
 - Pricing:
   - Partner stall items have a fixed price: `price_min_cents = price_max_cents`.
   - General market items (stall_id null) have a range. Show "€1.50 to €2.00". Label them "Picked by our shopper at the best stall of the day".
   - Cart and checkout show the subtotal as a range when any item is ranged: "€23.40 to €25.10". Otherwise a single number.
-  - Online / service markup: always 15% of the grocery subtotal (`Math.round(subtotal * 0.15)`), for both home and pickup. Shown separately from delivery. Stored as `markup_min_cents` / `markup_max_cents`.
-  - Customer total = grocery subtotal + 15% markup + fulfilment fee (`fee_cents` is delivery only).
-  - Stall catalogue prices stay as stall prices; markup is a separate line, not baked into unit snapshots.
+  - Product cards always show the stall price. Never add a markup to product prices.
+  - Service fee: `serviceFee(subtotal) = min(round(subtotal * 0.15), 800)` cents, for both home and pickup. Its own checkout line: "Service fee (15%, max €8)". Stored in the `markup_min_cents` / `markup_max_cents` columns (legacy names, not renamed to avoid a live migration).
+  - Delivery €4.50, pickup free (`fee_cents` is delivery only).
+  - Minimum order: `MIN_ORDER_CENTS = 1500` basket subtotal (low end of a range). Below it, "Place order" is disabled with "Minimum order is €15. Add €X.XX more." Enforced again in `placeOrder`.
+  - Customer total = basket subtotal + service fee + delivery. Ranged subtotals show fee and total as ranges.
+  - Payment: customers pay when they place the order, not on handover.
+  - Header and sticky cart totals show the subtotal only, labelled "Subtotal".
 - Deals:
   - `deal_price_cents` not null and (`deal_starts_on` null or today or earlier) = active deal. Use deal price, show old price struck through, show `deal_note`.
   - `deal_starts_on` in the future = "Coming soon". Show in its own strip with the date. Not addable to cart.
@@ -56,7 +60,7 @@ This is a hackathon demo built in 5 hours. It must work end to end on a phone an
 
 - `lib/supabase.ts` server client
 - `lib/types.ts` types matching `supabase.sql`
-- `lib/pricing.ts`: `formatEuro(cents)`, `isDealActive(product, today)`, `isComingSoon(product, today)`, `unitRange(product, today) -> {min, max}`, `formatRange(min, max)`, `feeFor(fulfilment)`, `markupCents(subtotal)`, `orderTotals(...)`
+- `lib/pricing.ts`: `formatEuro(cents)`, `isDealActive(product, today)`, `isComingSoon(product, today)`, `unitRange(product, today) -> {min, max}`, `formatRange(min, max)`, `feeFor(fulfilment)`, `serviceFee(subtotal)`, `minOrderShortfall(subtotalMin)`, `MIN_ORDER_CENTS`, `orderTotals(...)`, `customerTotals(order)`
 - `lib/cart.tsx` cart context: `items`, `add(productId, qty)`, `remove`, `setQty`, `clear`, `count`
 - `app/layout.tsx`, `app/globals.css`, fonts, design tokens
 

@@ -4,6 +4,7 @@ import Link from "next/link";
 import { PriceCard } from "@/components/shared/PriceCard";
 import { Produce } from "@/components/shared/Produce";
 import { QtyStepper } from "@/components/shared/QtyStepper";
+import { allergenLine } from "@/lib/allergens";
 import { useCart } from "@/lib/cart";
 import { isDealActive, isComingSoon, unitRange } from "@/lib/pricing";
 import type { Product } from "@/lib/types";
@@ -48,6 +49,8 @@ export function ProductCard({
     ? items.find((item) => item.productId === product.id)
     : undefined;
   const compact = size === "compact";
+  // "None" on every vegetable tile is noise; the bag lists all three states.
+  const allergens = allergenLine(product);
 
   return (
     <article className="group flex h-full min-w-0 flex-col">
@@ -116,6 +119,9 @@ export function ProductCard({
       >
         <h3 className="display-sm line-clamp-2 leading-tight">{product.name}</h3>
         <p className="text-meta text-ink/55">{product.unit}</p>
+        {allergens && allergens.tone !== "none" ? (
+          <p className="line-clamp-2 text-xs text-ink/60">{allergens.text}</p>
+        ) : null}
         {deal && product.deal_note ? (
           <p className="line-clamp-2 text-xs text-maastricht-red">
             {product.deal_note}

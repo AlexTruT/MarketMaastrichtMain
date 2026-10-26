@@ -3,12 +3,7 @@
 import Link from "next/link";
 import { ShoppingBag } from "lucide-react";
 import { useCart } from "@/lib/cart";
-import {
-  formatEuro,
-  isComingSoon,
-  lineTotals,
-  midpoint,
-} from "@/lib/pricing";
+import { formatRange, isComingSoon, lineTotals } from "@/lib/pricing";
 import { Produce } from "@/components/shared/Produce";
 import { QtyStepper } from "@/components/shared/QtyStepper";
 import {
@@ -51,10 +46,8 @@ export function HeaderCart({ products, todayIso }: HeaderCartProps) {
     subtotalMin += line.totals.min;
     subtotalMax += line.totals.max;
   }
-  const groceries = midpoint(subtotalMin, subtotalMax);
-  // Match /cart "Groceries" line (stall prices only, no 15% markup or delivery).
-  const headerTotal = groceries;
-  const hasRange = subtotalMin !== subtotalMax;
+  // Subtotal only, at stall prices — matches the /cart "Subtotal" line.
+  const subtotal = formatRange(subtotalMin, subtotalMax);
 
   return (
     <Sheet>
@@ -63,7 +56,7 @@ export function HeaderCart({ products, todayIso }: HeaderCartProps) {
         aria-label={
           shownCount === 0
             ? "Open bag"
-            : `Open bag, ${shownCount} ${shownCount === 1 ? "item" : "items"}, ${formatEuro(headerTotal)}`
+            : `Open bag, ${shownCount} ${shownCount === 1 ? "item" : "items"}, subtotal ${subtotal}`
         }
       >
         <span className="relative mb-0.5 inline-flex size-5 shrink-0 items-center justify-center overflow-visible">
@@ -76,7 +69,8 @@ export function HeaderCart({ products, todayIso }: HeaderCartProps) {
         </span>
         {shownCount > 0 ? (
           <span className="tabular-nums font-medium text-ink">
-            {formatEuro(headerTotal)}
+            <span className="font-normal text-ink/55">Subtotal </span>
+            {subtotal}
           </span>
         ) : (
           <span>Bag</span>
@@ -115,8 +109,7 @@ export function HeaderCart({ products, todayIso }: HeaderCartProps) {
                   <div className="min-w-0 flex-1">
                     <p className="truncate text-sm font-medium">{product.name}</p>
                     <p className="text-xs text-ink/55">
-                      {product.unit} · {formatEuro(midpoint(totals.min, totals.max))}
-                      {totals.min !== totals.max ? " (est.)" : ""}
+                      {product.unit} · {formatRange(totals.min, totals.max)}
                     </p>
                     <button
                       type="button"
@@ -140,12 +133,8 @@ export function HeaderCart({ products, todayIso }: HeaderCartProps) {
         <SheetFooter>
           {lines.length > 0 ? (
             <div className="flex items-baseline justify-between text-sm">
-              <span className="text-ink/60">
-                {hasRange ? "Groceries up to" : "Groceries"}
-              </span>
-              <span className="font-medium tabular-nums">
-                {formatEuro(hasRange ? subtotalMax : groceries)}
-              </span>
+              <span className="text-ink/60">Subtotal</span>
+              <span className="font-medium tabular-nums">{subtotal}</span>
             </div>
           ) : null}
           <Link

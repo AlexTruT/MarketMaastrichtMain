@@ -1,12 +1,13 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
+import { allergenLine } from "@/lib/allergens";
 import { getOrder } from "@/lib/data";
 import { canViewOrder } from "@/lib/order-access";
 import {
   customerTotals,
   formatEuro,
-  markupCents,
-  midpoint,
+  formatRange,
+  SERVICE_FEE_LABEL,
 } from "@/lib/pricing";
 import { Produce } from "@/components/shared/Produce";
 
@@ -49,11 +50,15 @@ export default async function OrderConfirmationPage({
     );
   }
 
-  const { subtotalMin, subtotalMax, fee } = customerTotals(order);
-  // Stored order keeps real min/max; confirmation shows midpoints.
-  const displaySubtotal = midpoint(subtotalMin, subtotalMax);
-  const displayMarkup = markupCents(displaySubtotal);
-  const displayTotal = displaySubtotal + displayMarkup + fee;
+  const {
+    subtotalMin,
+    subtotalMax,
+    serviceFeeMin,
+    serviceFeeMax,
+    fee,
+    totalMin,
+    totalMax,
+  } = customerTotals(order);
   // A bare "1" on a yellow card reads as a stray mark, not a label. Crates
   // on the hub bench are numbered with the same padding.
   const crateLabel = `#${String(order.id).padStart(3, "0")}`;
@@ -136,13 +141,17 @@ export default async function OrderConfirmationPage({
               <p className="text-xs text-ink/55">
                 {item.qty} × {item.product.unit}
               </p>
+              {(() => {
+                const allergens = allergenLine(item.product);
+                return allergens && allergens.tone !== "none" ? (
+                  <p className="text-xs text-ink/70">{allergens.text}</p>
+                ) : null;
+              })()}
             </div>
             <span className="shrink-0 text-sm tabular-nums">
-              {formatEuro(
-                midpoint(
-                  item.unit_min_cents * item.qty,
-                  item.unit_max_cents * item.qty
-                )
+              {formatRange(
+                item.unit_min_cents * item.qty,
+                item.unit_max_cents * item.qty
               )}
             </span>
           </li>
@@ -151,12 +160,16 @@ export default async function OrderConfirmationPage({
 
       <dl className="flex flex-col gap-2.5 pt-6 text-sm">
         <div className="flex items-baseline justify-between gap-4">
-          <dt className="text-ink/60">Groceries</dt>
-          <dd className="tabular-nums">{formatEuro(displaySubtotal)}</dd>
+          <dt className="text-ink/60">Subtotal</dt>
+          <dd className="tabular-nums">
+            {formatRange(subtotalMin, subtotalMax)}
+          </dd>
         </div>
         <div className="flex items-baseline justify-between gap-4">
-          <dt className="text-ink/60">Online markup 15%</dt>
-          <dd className="tabular-nums">{formatEuro(displayMarkup)}</dd>
+          <dt className="text-ink/60">{SERVICE_FEE_LABEL}</dt>
+          <dd className="tabular-nums">
+            {formatRange(serviceFeeMin, serviceFeeMax)}
+          </dd>
         </div>
         <div className="flex items-baseline justify-between gap-4">
           <dt className="text-ink/60">
@@ -170,8 +183,8 @@ export default async function OrderConfirmationPage({
 
       <div className="mt-5 flex items-center justify-between gap-4 border-t border-cobble pt-6">
         <p className="display-md">Total</p>
-        <span className="price-sign text-[1.75rem] leading-tight">
-          {formatEuro(displayTotal)}
+        <span className="price-sign text-right text-[1.75rem] leading-tight">
+          {formatRange(totalMin, totalMax)}
         </span>
       </div>
 

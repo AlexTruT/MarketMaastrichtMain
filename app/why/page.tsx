@@ -90,9 +90,9 @@ export default function WhyPage() {
             <ol className="mt-5 flex flex-col gap-4">
               {[
                 "Order online before Friday 10:00.",
+                "You pay when you order.",
                 "Our shopper walks the Markt with every list.",
                 "Crates leave for home delivery or the pickup stand.",
-                "You pay when the bag is handed over.",
               ].map((step, i) => (
                 <li key={step} className="flex gap-3">
                   <span className="grid size-7 shrink-0 place-items-center rounded-full bg-awning text-xs font-semibold text-paper tabular-nums">
@@ -108,7 +108,7 @@ export default function WhyPage() {
             <h2 className="display-md text-ink">The money</h2>
             <p className="text-lede mt-3 text-ink/75">
               Groceries at stall prices + <strong className="font-medium text-ink">15%</strong>{" "}
-              online markup + <strong className="font-medium text-ink">€4.50</strong>{" "}
+              service fee (max €8), shown at checkout + <strong className="font-medium text-ink">€4.50</strong>{" "}
               delivery (pickup free). Vendors keep 100% of the grocery bill. Tips
               go to couriers. [3]
             </p>

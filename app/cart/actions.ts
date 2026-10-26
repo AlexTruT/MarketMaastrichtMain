@@ -3,7 +3,14 @@
 import { supabase } from "@/lib/supabase";
 import { getProducts, phoneDigits } from "@/lib/data";
 import { grantOrderConfirmation } from "@/lib/order-access";
-import { feeFor, isComingSoon, markupCents, unitRange } from "@/lib/pricing";
+import {
+  feeFor,
+  isComingSoon,
+  minOrderMessage,
+  minOrderShortfall,
+  serviceFee,
+  unitRange,
+} from "@/lib/pricing";
 import type { Fulfilment, Substitution } from "@/lib/types";
 
 type PlaceOrderInput = {
@@ -147,9 +154,12 @@ export async function placeOrder(
     return { error: "Could not price your bag. Remove an item and try again." };
   }
 
+  const shortfall = minOrderShortfall(subtotalMin);
+  if (shortfall > 0) return { error: minOrderMessage(shortfall) };
+
   const fee = feeFor(input.fulfilment);
-  const markupMin = markupCents(subtotalMin);
-  const markupMax = markupCents(subtotalMax);
+  const serviceFeeMin = serviceFee(subtotalMin);
+  const serviceFeeMax = serviceFee(subtotalMax);
 
   const orderRow = {
     customer_name: customerName,
@@ -165,14 +175,15 @@ export async function placeOrder(
     fee_cents: fee,
   };
 
-  // Prefer storing the 15% snapshots. Live DBs created before
-  // supabase-markup.sql reject those columns (PGRST204); retry without.
+  // Service fee snapshots live in the markup_*_cents columns. Live DBs
+  // created before supabase-markup.sql reject those columns (PGRST204);
+  // retry without, and customerTotals() recomputes them on read.
   let { data: order, error: orderError } = await supabase
     .from("orders")
     .insert({
       ...orderRow,
-      markup_min_cents: markupMin,
-      markup_max_cents: markupMax,
+      markup_min_cents: serviceFeeMin,
+      markup_max_cents: serviceFeeMax,
     })
     .select("id")
     .single();

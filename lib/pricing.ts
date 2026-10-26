@@ -116,39 +116,66 @@ export function feeFor(fulfilment: Fulfilment): number {
   return fulfilment === "home" ? 450 : 0;
 }
 
-/** Online / service markup on grocery subtotals (all online orders). */
-export const ONLINE_MARKUP_RATE = 0.15;
+export const SERVICE_FEE_RATE = 0.15;
+export const SERVICE_FEE_CAP_CENTS = 800;
+export const SERVICE_FEE_LABEL = "Service fee (15%, max €8)";
 
-/** 15% of a product subtotal, rounded to the nearest cent. */
-export function markupCents(subtotalCents: number): number {
-  if (!isFiniteCents(subtotalCents)) return 0;
-  return Math.round(subtotalCents * ONLINE_MARKUP_RATE);
+/** Basket subtotal (stall prices) below which "Place order" is disabled. */
+export const MIN_ORDER_CENTS = 1500;
+
+/**
+ * Service fee on the basket subtotal: 15%, capped at €8. Product prices are
+ * always stall prices; this is the only thing Merret adds besides delivery.
+ */
+export function serviceFee(subtotalCents: number): number {
+  if (!isFiniteCents(subtotalCents) || subtotalCents <= 0) return 0;
+  return Math.min(
+    Math.round(subtotalCents * SERVICE_FEE_RATE),
+    SERVICE_FEE_CAP_CENTS
+  );
 }
 
-/** Customer total: grocery subtotal + 15% online markup + fulfilment fee. */
+/**
+ * Cents still needed to reach the minimum order. Uses the low end of a
+ * ranged subtotal so a basket that clears it is guaranteed to, whatever
+ * the shopper ends up paying.
+ */
+export function minOrderShortfall(subtotalMinCents: number): number {
+  if (!isFiniteCents(subtotalMinCents)) return MIN_ORDER_CENTS;
+  return Math.max(0, MIN_ORDER_CENTS - Math.round(subtotalMinCents));
+}
+
+/** Shared by checkout and placeOrder so the wording never drifts. */
+export function minOrderMessage(shortfallCents: number): string {
+  return `Minimum order is €${MIN_ORDER_CENTS / 100}. Add ${formatEuro(shortfallCents)} more.`;
+}
+
+/** Customer total: basket subtotal + capped service fee + delivery. */
 export function orderTotals(
   subtotalMin: number,
   subtotalMax: number,
   fulfilment: Fulfilment
 ): {
-  markupMin: number;
-  markupMax: number;
+  serviceFeeMin: number;
+  serviceFeeMax: number;
   fee: number;
   totalMin: number;
   totalMax: number;
 } {
-  const markupMin = markupCents(subtotalMin);
-  const markupMax = markupCents(subtotalMax);
+  const serviceFeeMin = serviceFee(subtotalMin);
+  const serviceFeeMax = serviceFee(subtotalMax);
   const fee = feeFor(fulfilment);
   return {
-    markupMin,
-    markupMax,
+    serviceFeeMin,
+    serviceFeeMax,
     fee,
-    totalMin: subtotalMin + markupMin + fee,
-    totalMax: subtotalMax + markupMax + fee,
+    totalMin: subtotalMin + serviceFeeMin + fee,
+    totalMax: subtotalMax + serviceFeeMax + fee,
   };
 }
 
+// The orders table still names the service fee snapshot markup_*_cents;
+// renaming the columns would need a migration on the live database.
 type StoredOrderMoney = {
   fulfilment: Fulfilment;
   subtotal_min_cents?: number | null;
@@ -165,14 +192,14 @@ type StoredOrderMoney = {
 
 /**
  * Customer totals from a stored order. Live DBs created before
- * supabase-markup.sql omit markup columns (undefined on select *), which
- * used to become €NaN. Missing snapshots are recomputed in integer cents.
+ * supabase-markup.sql omit the fee snapshot columns (undefined on select *),
+ * which used to become €NaN. Missing snapshots are recomputed in integer cents.
  */
 export function customerTotals(order: StoredOrderMoney): {
   subtotalMin: number;
   subtotalMax: number;
-  markupMin: number;
-  markupMax: number;
+  serviceFeeMin: number;
+  serviceFeeMax: number;
   fee: number;
   totalMin: number;
   totalMax: number;
@@ -203,17 +230,19 @@ export function customerTotals(order: StoredOrderMoney): {
     }
   }
 
-  // 0 + a real subtotal is the ADD COLUMN default, not a stored 15% snapshot.
-  const markupMin =
+  // A stored snapshot is what the customer was quoted, so it wins (older
+  // orders keep their uncapped fee). 0 with a real subtotal is the ADD
+  // COLUMN default, not a snapshot, so that is recomputed.
+  const serviceFeeMin =
     isFiniteCents(order.markup_min_cents) &&
     !(order.markup_min_cents === 0 && subtotalMin > 0)
       ? Math.round(order.markup_min_cents)
-      : markupCents(subtotalMin);
-  const markupMax =
+      : serviceFee(subtotalMin);
+  const serviceFeeMax =
     isFiniteCents(order.markup_max_cents) &&
     !(order.markup_max_cents === 0 && subtotalMax > 0)
       ? Math.round(order.markup_max_cents)
-      : markupCents(subtotalMax);
+      : serviceFee(subtotalMax);
   const fee = isFiniteCents(order.fee_cents)
     ? Math.round(order.fee_cents)
     : feeFor(order.fulfilment);
@@ -221,11 +250,11 @@ export function customerTotals(order: StoredOrderMoney): {
   return {
     subtotalMin,
     subtotalMax,
-    markupMin,
-    markupMax,
+    serviceFeeMin,
+    serviceFeeMax,
     fee,
-    totalMin: subtotalMin + markupMin + fee,
-    totalMax: subtotalMax + markupMax + fee,
+    totalMin: subtotalMin + serviceFeeMin + fee,
+    totalMax: subtotalMax + serviceFeeMax + fee,
   };
 }
 

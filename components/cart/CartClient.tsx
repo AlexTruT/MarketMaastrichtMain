@@ -9,16 +9,19 @@ import { Textarea } from "@/components/ui/textarea";
 import { QtyStepper } from "@/components/shared/QtyStepper";
 import { Produce } from "@/components/shared/Produce";
 import { cn } from "@/lib/utils";
+import { allergenLine } from "@/lib/allergens";
 import { useCart } from "@/lib/cart";
 import {
   feeFor,
   formatEuro,
+  formatRange,
   isComingSoon,
   isDealActive,
   lineTotals,
-  markupCents,
-  midpoint,
+  minOrderMessage as formatMinOrderMessage,
+  minOrderShortfall,
   orderTotals,
+  SERVICE_FEE_LABEL,
 } from "@/lib/pricing";
 import { placeOrder } from "@/app/cart/actions";
 import type { Fulfilment, Product, Substitution } from "@/lib/types";
@@ -264,11 +267,11 @@ export function CartClient({ products, todayIso }: CartClientProps) {
     subtotalMin += line.min;
     subtotalMax += line.max;
   }
-  // placeOrder still stores real min/max; checkout UI shows midpoints.
-  const { fee } = orderTotals(subtotalMin, subtotalMax, fulfilment);
-  const displaySubtotal = midpoint(subtotalMin, subtotalMax);
-  const displayMarkup = markupCents(displaySubtotal);
-  const displayTotal = displaySubtotal + displayMarkup + fee;
+  const { serviceFeeMin, serviceFeeMax, fee, totalMin, totalMax } =
+    orderTotals(subtotalMin, subtotalMax, fulfilment);
+  const shortfall = minOrderShortfall(subtotalMin);
+  const minOrderMessage =
+    shortfall > 0 ? formatMinOrderMessage(shortfall) : null;
 
   function clearError(field: FieldError) {
     setErrors((prev) => {
@@ -309,6 +312,7 @@ export function CartClient({ products, todayIso }: CartClientProps) {
       setErrors({ form: "Your bag is empty. Add something from the market." });
       return;
     }
+    if (minOrderMessage) return;
 
     setSubmitting(true);
     setErrors({});
@@ -395,6 +399,7 @@ export function CartClient({ products, todayIso }: CartClientProps) {
           {lines.map(({ item, product }) => {
             const line = lineTotals(product, item.qty, today);
             const deal = isDealActive(product, today);
+            const allergens = allergenLine(product);
             return (
               <li
                 key={product.id}
@@ -408,11 +413,21 @@ export function CartClient({ products, todayIso }: CartClientProps) {
                     {product.name}
                   </p>
                   <p className="text-xs text-ink/55">
-                    {product.unit} · {formatEuro(midpoint(line.min, line.max))}
+                    {product.unit} · {formatRange(line.min, line.max)}
                   </p>
                   {deal && product.deal_note ? (
                     <p className="pt-0.5 text-xs text-maastricht-red">
                       {product.deal_note}
+                    </p>
+                  ) : null}
+                  {allergens ? (
+                    <p
+                      className={cn(
+                        "pt-0.5 text-xs",
+                        allergens.tone === "none" ? "text-ink/45" : "text-ink/70"
+                      )}
+                    >
+                      {allergens.text}
                     </p>
                   ) : null}
                   {!product.stall_id ? (
@@ -437,6 +452,12 @@ export function CartClient({ products, todayIso }: CartClientProps) {
             );
           })}
         </ul>
+
+        <p className="max-w-[54ch] pt-3 text-meta text-ink/55">
+          Allergen details come from each stall. Market food is sold
+          unpacked next to other products, so traces are possible. If you
+          have an allergy, add it to the note for our shopper below.
+        </p>
 
         {prunedStale && (
           <p className="max-w-[54ch] pt-3 text-meta text-maastricht-red">
@@ -624,12 +645,16 @@ export function CartClient({ products, todayIso }: CartClientProps) {
       <div className="px-4 py-9">
         <dl className="flex flex-col gap-2.5 text-sm">
           <div className="flex items-baseline justify-between gap-4">
-            <dt className="text-ink/60">Groceries</dt>
-            <dd className="tabular-nums">{formatEuro(displaySubtotal)}</dd>
+            <dt className="text-ink/60">Subtotal</dt>
+            <dd className="tabular-nums">
+              {formatRange(subtotalMin, subtotalMax)}
+            </dd>
           </div>
           <div className="flex items-baseline justify-between gap-4">
-            <dt className="text-ink/60">Online markup 15%</dt>
-            <dd className="tabular-nums">{formatEuro(displayMarkup)}</dd>
+            <dt className="text-ink/60">{SERVICE_FEE_LABEL}</dt>
+            <dd className="tabular-nums">
+              {formatRange(serviceFeeMin, serviceFeeMax)}
+            </dd>
           </div>
           <div className="flex items-baseline justify-between gap-4">
             <dt className="text-ink/60">
@@ -643,10 +668,20 @@ export function CartClient({ products, todayIso }: CartClientProps) {
 
         <div className="mt-5 flex items-center justify-between gap-4 border-t border-cobble pt-6">
           <p className="display-md">Total</p>
-          <span className="price-sign text-[1.75rem] leading-tight">
-            {formatEuro(displayTotal)}
+          <span className="price-sign text-right text-[1.75rem] leading-tight">
+            {formatRange(totalMin, totalMax)}
           </span>
         </div>
+
+        {minOrderMessage ? (
+          <p
+            role="status"
+            aria-live="polite"
+            className="mt-5 text-lede text-maastricht-red"
+          >
+            {minOrderMessage}
+          </p>
+        ) : null}
 
         {errors.form ? (
           <p
@@ -659,14 +694,14 @@ export function CartClient({ products, todayIso }: CartClientProps) {
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || minOrderMessage !== null}
           aria-busy={submitting}
           className="mt-7 h-14 w-full rounded-md bg-awning text-base font-medium text-paper transition-transform duration-150 ease-out focus-visible:ring-2 focus-visible:ring-awning focus-visible:ring-offset-2 focus-visible:ring-offset-paper focus-visible:outline-none active:scale-[0.99] disabled:pointer-events-none disabled:opacity-60"
         >
           {submitting ? "Placing your order…" : "Place order"}
         </button>
         <p className="pt-3 text-center text-xs text-ink/50">
-          Nothing is charged now. You pay when the crate is handed over.
+          You pay when you place the order.
         </p>
       </div>
     </form>
