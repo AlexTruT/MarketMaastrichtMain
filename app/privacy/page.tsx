@@ -10,7 +10,7 @@ export default function PrivacyPage() {
   return (
     <article className="page-narrow px-4 pt-8 pb-12">
       <h1 className="display-lg">Privacy</h1>
-      <p className="text-meta pt-2 text-ink/55">Last updated 24 September 2026</p>
+      <p className="text-meta pt-2 text-ink/55">Last updated 30 October 2026</p>
 
       <div className="text-lede flex flex-col gap-5 pt-6 text-ink/80">
         <p>
@@ -57,6 +57,16 @@ export default function PrivacyPage() {
             To shop the Markt for you, pack your crate, deliver or hold it for
             pickup, and show you your recent orders after you confirm your
             phone. We do not sell your data or use it for advertising.
+          </p>
+        </section>
+
+        <section className="flex flex-col gap-2">
+          <h2 className="display-md text-ink">Waitlist</h2>
+          <p>
+            If you join the waitlist, we store your email address and your
+            answers. We use them only to contact you about Merret&apos;s launch
+            and to understand demand. We never share or sell them. To be
+            removed, email us at [contact email].
           </p>
         </section>
 
