@@ -9,6 +9,7 @@ import { cn } from "@/lib/utils";
 import { joinWaitlist } from "./actions";
 import {
   BARRIERS,
+  cleanSource,
   FREQUENCIES,
   looksLikeEmail,
   POSTCODE_MAX,
@@ -173,7 +174,7 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
-export function WaitlistForm({ source, demo }: { source: string; demo: boolean }) {
+export function WaitlistForm({ demo }: { demo: boolean }) {
   const [lang, setLang] = useState<Lang>("nl");
   const [frequency, setFrequency] = useState<Frequency | null>(null);
   const [barriers, setBarriers] = useState<Barrier[]>([]);
@@ -254,7 +255,8 @@ export function WaitlistForm({ source, demo }: { source: string; demo: boolean }
         useMode: useMode!,
         postcode,
         lang,
-        source,
+        // Read at submit so the page itself stays static (no searchParams).
+        source: cleanSource(new URLSearchParams(window.location.search).get("src")),
         consent,
       });
       if (result.ok) {

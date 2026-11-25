@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { getCatalogue } from "@/lib/data";
 import { WaitlistForm } from "./WaitlistForm";
-import { cleanSource } from "./options";
 
 const title = "Merret wachtlijst";
 const description =
@@ -16,13 +15,9 @@ export const metadata: Metadata = {
   alternates: { canonical: url },
 };
 
-export default async function WaitlistPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ src?: string | string[] }>;
-}) {
-  const [{ src }, { demo }] = await Promise.all([searchParams, getCatalogue()]);
-  return (
-    <WaitlistForm source={cleanSource(Array.isArray(src) ? src[0] : src)} demo={demo} />
-  );
+// ?src= (flyer, linkedin...) is read in the browser at submit, so this page
+// is prerendered and served from the CDN.
+export default async function WaitlistPage() {
+  const { demo } = await getCatalogue();
+  return <WaitlistForm demo={demo} />;
 }

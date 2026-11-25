@@ -201,15 +201,6 @@
   animation: page-enter 180ms ease-out backwards;
 }
 
-/* View Transitions API (experimental.viewTransition) — short crossfade. */
-@supports (view-transition-name: none) {
-  ::view-transition-old(root),
-  ::view-transition-new(root) {
-    animation-duration: 180ms;
-    animation-timing-function: ease-out;
-  }
-}
-
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -330,12 +321,5 @@
   .cart-bar-enter,
   .page-enter {
     animation: none !important;
-  }
-
-  @supports (view-transition-name: none) {
-    ::view-transition-old(root),
-    ::view-transition-new(root) {
-      animation: none !important;
-    }
   }
 }

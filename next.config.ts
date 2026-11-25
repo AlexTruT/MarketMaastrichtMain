@@ -6,8 +6,6 @@ const nextConfig: NextConfig = {
     formats: ["image/avif", "image/webp"],
   },
   experimental: {
-    // Crossfade App Router navigations via the View Transitions API.
-    viewTransition: true,
     // The price board scanner sends a base64 photo as a server action
     // argument; a real phone photo comfortably exceeds Next's 1MB default.
     serverActions: {

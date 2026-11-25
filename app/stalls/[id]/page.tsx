@@ -1,10 +1,16 @@
 import Image from "next/image";
 import { notFound } from "next/navigation";
-import { getProductsByStall, getStall } from "@/lib/data";
+import { getProductsByStall, getStall, getStalls } from "@/lib/data";
 import { stallScene } from "@/lib/stall-scenes";
 import { ProductCard } from "@/components/shared/ProductCard";
 import { ProductShelf } from "@/components/shared/ProductShelf";
 import { SellerProfileHeader } from "@/components/stalls/SellerProfileHeader";
+
+// Prerender every stall page at build time (refreshed with the catalogue
+// every 60s) instead of rendering each visit on the server.
+export async function generateStaticParams() {
+  return (await getStalls()).map((stall) => ({ id: stall.id }));
+}
 
 export default async function StallPage({
   params,
