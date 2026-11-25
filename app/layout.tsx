@@ -5,7 +5,7 @@ import {
   Permanent_Marker,
 } from "next/font/google";
 import { CartProvider } from "@/lib/cart";
-import { getProducts } from "@/lib/data";
+import { getCatalogue, type Catalogue } from "@/lib/data";
 import { Toaster } from "@/components/ui/sonner";
 import { SiteHeader } from "@/components/shared/SiteHeader";
 import { SiteFooter } from "@/components/shared/SiteFooter";
@@ -75,12 +75,14 @@ export const revalidate = 60;
 
 export default async function RootLayout({ children }: LayoutProps<"/">) {
   const today = new Date();
-  let products: Awaited<ReturnType<typeof getProducts>> = [];
+  let catalogue: Catalogue;
   try {
-    products = await getProducts();
+    catalogue = await getCatalogue();
   } catch (err) {
-    console.error("[layout] getProducts failed", err);
+    console.error("[layout] getCatalogue failed", err);
+    catalogue = { products: [], stalls: [], demo: false };
   }
+  const { products, demo } = catalogue;
 
   return (
     <html
@@ -89,6 +91,11 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
     >
       <body className="flex min-h-full flex-col overflow-x-hidden bg-paper text-ink">
         <CartProvider>
+          {demo ? (
+            <p className="bg-ink px-4 py-1.5 text-center text-meta text-paper">
+              Demo version. Orders stay on this device.
+            </p>
+          ) : null}
           <SiteHeader
             products={products}
             todayIso={today.toISOString()}

@@ -16,8 +16,13 @@ if (supabaseUrl && supabaseServiceRoleKey) {
   });
 } else {
   console.warn(
-    "[supabase] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY — catalogue reads return empty."
+    "[supabase] Missing SUPABASE_URL or SUPABASE_SERVICE_ROLE_KEY — the site shows the built-in demo catalogue."
   );
+}
+
+/** False when the env vars are absent; the catalogue then uses the demo copy. */
+export function hasSupabase(): boolean {
+  return client !== null;
 }
 
 export function getSupabase(): SupabaseClient {

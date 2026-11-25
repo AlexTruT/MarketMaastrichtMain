@@ -11,13 +11,11 @@ export function ProductShelf({
   className,
   dense = false,
   rail = false,
-  compact: _compact = false,
   children,
 }: {
   className?: string;
   dense?: boolean;
   rail?: boolean;
-  compact?: boolean;
   children: React.ReactNode;
 }) {
   if (rail) {

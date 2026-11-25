@@ -91,7 +91,7 @@ const BY_CATEGORY: Record<ProductCategory, string> = {
   more: "onions",
 };
 
-function photoKey(name: string, category: ProductCategory): string {
+export function photoKey(name: string, category: ProductCategory): string {
   const key = produceKey(name);
   if (HAS_PHOTO.has(key)) return key;
   const alias = PHOTO_ALIAS[key];

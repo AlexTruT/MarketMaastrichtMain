@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { getCatalogue } from "@/lib/data";
 import { WaitlistForm } from "./WaitlistForm";
 import { cleanSource } from "./options";
 
@@ -20,6 +21,8 @@ export default async function WaitlistPage({
 }: {
   searchParams: Promise<{ src?: string | string[] }>;
 }) {
-  const { src } = await searchParams;
-  return <WaitlistForm source={cleanSource(Array.isArray(src) ? src[0] : src)} />;
+  const [{ src }, { demo }] = await Promise.all([searchParams, getCatalogue()]);
+  return (
+    <WaitlistForm source={cleanSource(Array.isArray(src) ? src[0] : src)} demo={demo} />
+  );
 }

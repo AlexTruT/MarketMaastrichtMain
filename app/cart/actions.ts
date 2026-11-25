@@ -1,7 +1,8 @@
 "use server";
 
 import { supabase } from "@/lib/supabase";
-import { getProducts, phoneDigits } from "@/lib/data";
+import { getCatalogue, phoneDigits } from "@/lib/data";
+import { saveDemoOrder } from "@/lib/demo-order";
 import { grantOrderConfirmation } from "@/lib/order-access";
 import {
   feeFor,
@@ -61,12 +62,20 @@ export async function placeOrder(
   if (!SUBSTITUTIONS.includes(input.substitution)) {
     return { error: "Choose what to do if something is out of stock." };
   }
+  if (
+    customerName.length > 120 ||
+    phone.length > 40 ||
+    (input.address?.trim().length ?? 0) > 300 ||
+    (input.note?.trim().length ?? 0) > 600
+  ) {
+    return { error: "One of the fields is too long. Shorten it and try again." };
+  }
   if (!Array.isArray(input.items) || input.items.length === 0) {
     return { error: "Your bag is empty." };
   }
 
   const today = new Date();
-  const products = await getProducts();
+  const { products, demo } = await getCatalogue();
   const byId = new Map(products.map((p) => [p.id, p]));
 
   // Merge duplicate productIds (sum qty, capped) before validating lines.
@@ -174,6 +183,23 @@ export async function placeOrder(
     subtotal_max_cents: subtotalMax,
     fee_cents: fee,
   };
+
+  if (demo) {
+    // No database: keep the order on this device so the confirmation and
+    // profile pages still work. Only one demo order lives on a device, so a
+    // short 4-digit id reads like a real ticket number.
+    const id = 1000 + (Date.now() % 9000);
+    await saveDemoOrder({
+      ...orderRow,
+      id,
+      created_at: today.toISOString(),
+      markup_min_cents: serviceFeeMin,
+      markup_max_cents: serviceFeeMax,
+      lines,
+    });
+    await grantOrderConfirmation(id);
+    return { orderId: id };
+  }
 
   // Service fee snapshots live in the markup_*_cents columns. Live DBs
   // created before supabase-markup.sql reject those columns (PGRST204);

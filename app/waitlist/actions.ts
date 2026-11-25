@@ -1,5 +1,6 @@
 "use server";
 
+import { getCatalogue } from "@/lib/data";
 import { supabase } from "@/lib/supabase";
 import {
   BARRIERS,
@@ -54,6 +55,9 @@ export async function joinWaitlist(
       : "";
   if (postcodeRaw.length > POSTCODE_MAX) return { ok: false };
   if (postcodeRaw && !/^[0-9A-Z ]+$/.test(postcodeRaw)) return { ok: false };
+
+  // Demo mode has no database to write to; the confirmation says so.
+  if ((await getCatalogue()).demo) return { ok: true };
 
   const { error } = await supabase.from("waitlist").upsert(
     {

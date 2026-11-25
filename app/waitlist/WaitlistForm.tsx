@@ -60,6 +60,7 @@ const COPY = {
     error: "Dat ging niet goed. Probeer het opnieuw.",
     doneTitle: "Je staat op de lijst.",
     doneBody: "We mailen je zodra we starten. Laat je de buren het weten?",
+    demoBody: "Dit is de demoversie: je aanmelding is niet opgeslagen. Laat je de buren het weten?",
     share: "Deel",
     copied: "Link gekopieerd",
   },
@@ -103,6 +104,7 @@ const COPY = {
     error: "Something went wrong. Please try again.",
     doneTitle: "You're on the list.",
     doneBody: "We'll email you when we launch. Tell your neighbours?",
+    demoBody: "This is the demo version, so your signup was not saved. Tell your neighbours?",
     share: "Share",
     copied: "Link copied",
   },
@@ -171,7 +173,7 @@ async function copyText(text: string): Promise<boolean> {
   }
 }
 
-export function WaitlistForm({ source }: { source: string }) {
+export function WaitlistForm({ source, demo }: { source: string; demo: boolean }) {
   const [lang, setLang] = useState<Lang>("nl");
   const [frequency, setFrequency] = useState<Frequency | null>(null);
   const [barriers, setBarriers] = useState<Barrier[]>([]);
@@ -320,7 +322,7 @@ export function WaitlistForm({ source }: { source: string }) {
             {t.doneTitle}
           </h2>
           <p className="text-lede max-w-[40ch] pt-2 text-ink/70">
-            {t.doneBody}
+            {demo ? t.demoBody : t.doneBody}
           </p>
           <button
             type="button"
